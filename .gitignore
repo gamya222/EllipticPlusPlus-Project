@@ -1,0 +1,22 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Raw dataset - too large for GitHub
+data/raw/
+
+# Generated processed data - regenerate locally
+data/processed/
+
+# PySpark / Hadoop temporary files
+*.crc
+
+# IDE files
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
