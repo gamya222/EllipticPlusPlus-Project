@@ -39,7 +39,7 @@ classes_df = (
 
 
 # --------------------------------------------------
-# The 18 features with NULL values
+# The feature columns with NULL values
 # --------------------------------------------------
 
 missing_features = [
@@ -94,7 +94,7 @@ print(
 )
 
 
-# Check whether ALL 18 are missing together
+# Check whether ALL listed features are missing together
 
 all_missing_condition = None
 
@@ -116,7 +116,7 @@ rows_with_all_missing = (
 )
 
 print(
-    "Rows with all 18 features missing:",
+    f"Rows with all {len(missing_features)} listed features missing:",
     rows_with_all_missing.count()
 )
 

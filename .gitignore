@@ -11,6 +11,9 @@ data/raw/
 # Generated processed data - regenerate locally
 data/processed/
 
+# Locally trained model artifacts
+models/*/artifacts/
+
 # PySpark / Hadoop temporary files
 *.crc
 

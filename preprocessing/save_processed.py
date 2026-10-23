@@ -72,6 +72,9 @@ transactions_df = (
 
 
 # --------------------------------------------------
+# Preserve feature NULLs unchanged. Any imputation added later must be fit
+# on training data only to avoid using held-out time steps.
+
 # Temporal split
 # --------------------------------------------------
 
