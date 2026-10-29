@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --background: #070d1e;
+  --foreground: #f8fafc;
+  --muted: #94a3b8;
+  --line: rgba(120, 170, 245, 0.22);
+  --cyan: #22d3ee;
+  --cyan-bright: #00f2fe;
+  --violet: #a855f7;
+  --coral: #f43f5e;
+  --amber: #fbbf24;
+  --emerald: #34d399;
+  --ink-blue: #0f1c3d;
+  --glass: rgba(18, 30, 60, 0.75);
+  --hairline: rgba(255, 255, 255, 0.1);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-width: 320px;
+  background: 
+    radial-gradient(1400px circle at 50% -10%, rgba(37, 99, 235, 0.22), transparent 70%),
+    radial-gradient(900px circle at 85% 15%, rgba(139, 92, 246, 0.16), transparent 60%),
+    radial-gradient(1000px circle at 15% 85%, rgba(6, 182, 212, 0.14), transparent 60%),
+    linear-gradient(180deg, #070d1e 0%, #0a142c 50%, #050a16 100%);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 18, 38, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 170, 245, 0.35);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.6);
+}

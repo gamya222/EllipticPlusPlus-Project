@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elliptic++ AI Financial-Crime Intelligence Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #060913;
+      --bg-surface: rgba(13, 20, 36, 0.72);
+      --bg-surface-elevated: rgba(19, 30, 54, 0.82);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-cyan: rgba(6, 182, 212, 0.3);
+      --border-violet: rgba(139, 92, 246, 0.3);
+      --cyan-glow: 0 0 25px rgba(6, 182, 212, 0.25);
+      --violet-glow: 0 0 25px rgba(139, 92, 246, 0.25);
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.6) 0%, transparent 70%);
+      color: #f1f5f9;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Glassmorphism Classes */
+    .glass-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.5);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .glass-card-interactive:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), var(--cyan-glow);
+      border-color: var(--border-cyan);
+    }
+
+    .glass-nav-btn {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.2s ease;
+    }
+    .glass-nav-btn:hover {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+    .glass-nav-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(139, 92, 246, 0.25) 100%);
+      border-color: #22d3ee;
+      color: #38bdf8;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    }
+
+    /* Glow badges */
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      color: #38bdf8;
+    }
+    .badge-violet {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #c084fc;
+    }
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+    .badge-rose {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fb7185;
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.2);
+    }
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #070b14; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Pulse animation */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(1.08); }
+    }
+    .pulse-live {
+      animation: pulse-glow 2.2s infinite ease-in-out;
+    }
+
+    .svg-embed-frame svg {
+      width: 100%;
+      height: auto;
+      max-height: 480px;
+      display: block;
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- ============================================================= -->
+  <!-- TOP INTELLIGENCE APEX BAR -->
+  <!-- ============================================================= -->
+  <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-6 py-3.5 shadow-2xl backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      
+      <!-- Brand & Telemetry -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-tr from-cyan-600/30 to-violet-600/30 border border-cyan-400/40 shadow-lg shadow-cyan-500/20">
+          <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-300">₿</span>
+          <span class="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-cyan-400 pulse-live"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+              <span>Elliptic++</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-md badge-violet font-mono uppercase tracking-wider">AI Forensic Suite</span>
+            </h1>
+            <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold badge-emerald">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Live Telemetry
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Temporal Bitcoin Graph Analytics &amp; Deep Illicit Transaction Detection</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto text-xs font-semibold py-1">
+        <button onclick="switchView('overview')" id="btn-overview" class="glass-nav-btn active px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <span>Overview &amp; KPIs</span>
+        </button>
+        <button onclick="switchView('explorer')" id="btn-explorer" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <span>High-Risk Explorer</span>
+          <span class="px-1.5 py-0.2 rounded text-[10px] bg-cyan-500/20 text-cyan-300 font-mono" id="nav-count-badge">67.5k</span>
+        </button>
+        <button onclick="switchView('models')" id="btn-models" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <span>Model Benchmark</span>
+        </button>
+        <button onclick="switchView('network')" id="btn-network" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <span>Transaction Network</span>
+        </button>
+        <button onclick="switchView('inference')" id="btn-inference" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <span>Live Inference</span>
+          <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ============================================================= -->
+  <!-- MAIN WORKSPACE -->
+  <!-- ============================================================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- ============================================================= -->
+    <!-- VIEW 1: AML EXECUTIVE OVERVIEW & KPI COCKPIT -->
+    <!-- ============================================================= -->
+    <div id="view-overview" class="view-panel space-y-6">
+      
+      <!-- Top Animated KPI Ribbon -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Total Dataset Scope -->
+        <div class="glass-card glass-card-interactive rounded-2xl p-5 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition duration-500"></div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <span>Test Partition Txs</span>
+            <span class="badge-cyan px-2 py-0.5 rounded text-[10px] font-mono">T35–49</span>
+          </div>
+          <div class="text-3xl font-black text-white tracking-tight font-mono" id="kpi-test-txs">67,504</div>
+          <div class="mt-2 text-xs text-slate-400 flex items-center justify-between">
+            <span>Total Dataset: <strong class="text-slate-200 font-mono">203,769</strong></span>
+            <span class="text-cyan-400 font-mono">182 Features</span>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-1.5 mt-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-1.5 rounded-full" style="width: 33.1%"></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Labeled Illicit Rate -->
+        <div class="glass-card glass-card-interactive rounded-2xl p-5 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition duration-500"></div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <span>Test Illicit Rate</span>
+            <span class="badge-rose px-2 py-0.5 rounded text-[10px] font-mono">Surge +4.15pp</span>
+          </div>
+          <div class="text-3xl font-black text-rose-400 tracking-tight font-mono" id="kpi-illicit-rate">6.4967%</div>
+          <div class="mt-2 text-xs text-slate-400 flex items-center justify-between">
+            <span>Illicit: <strong class="text-rose-300 font-mono">1,083</strong></span>
+            <span>Licit: <strong class="text-slate-200 font-mono">15,587</strong></span>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-1.5 mt-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 to-rose-500 h-1.5 rounded-full" style="width: 6.5%"></div>
+          </div>
+        </div>
+
+        <!-- Card 3: Elevated Risk Detected -->
+        <div class="glass-card glass-card-interactive rounded-2xl p-5 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition duration-500"></div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <span>Elevated Risk (&ge;0.20)</span>
+            <span class="badge-violet px-2 py-0.5 rounded text-[10px] font-mono">Ranked</span>
+          </div>
+          <div class="text-3xl font-black text-violet-300 tracking-tight font-mono" id="kpi-elevated-matches">35,062</div>
+          <div class="mt-2 text-xs text-slate-400 flex items-center justify-between">
+            <span>Top Suspicion Rank:</span>
+            <span class="text-violet-400 font-mono font-bold">txId 218061363</span>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-1.5 mt-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-violet-500 to-cyan-500 h-1.5 rounded-full" style="width: 51.9%"></div>
+          </div>
+        </div>
+
+        <!-- Card 4: Graph Topology & Modularity -->
+        <div class="glass-card glass-card-interactive rounded-2xl p-5 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition duration-500"></div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <span>Louvain Modularity</span>
+            <span class="badge-emerald px-2 py-0.5 rounded text-[10px] font-mono">317 Comm</span>
+          </div>
+          <div class="text-3xl font-black text-emerald-400 tracking-tight font-mono" id="kpi-modularity">0.9796</div>
+          <div class="mt-2 text-xs text-slate-400 flex items-center justify-between">
+            <span>Edges: <strong class="text-slate-200 font-mono">234,355</strong></span>
+            <span class="text-emerald-400 font-mono">0 Temporal Leaks</span>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-1.5 mt-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full" style="width: 97.9%"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Protocol & Telemetry Banner -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5 border-l-4 border-l-cyan-400 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-cyan-400 pulse-live"></span>
+            <h3 class="text-sm font-bold text-white tracking-wide">Temporal Inductive Evaluation Protocol</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono badge-cyan">Zero Future Leakage</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Models trained on Historical Timesteps 1–34 (with validation epoch selection on T31–34). Purely inductive evaluation on held-out test Timesteps 35–49. Graph adjacency respects strict causal timestep bounds.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 self-end md:self-center">
+          <button onclick="switchView('inference')" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-600/30 transition">
+            Launch Live Scorer →
+          </button>
+        </div>
+      </div>
+
+      <!-- Publication-Quality Graph Visualizer Section -->
+      <section class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/5 pb-4">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="text-cyan-400">✦</span> Empirical Dataset &amp; Graph Analytics Visualizer
+            </h2>
+            <p class="text-xs text-slate-400">Publication-quality vector figures computed directly from genuine Elliptic++ transaction graph records.</p>
+          </div>
+          <!-- Figure Selector Dropdown / Pills -->
+          <div class="flex items-center gap-2">
+            <select id="figure-select" onchange="loadSelectedFigure()" class="px-3 py-1.5 text-xs rounded-lg bg-[#070b14] border border-white/10 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+              <option value="01_temporal_split_class_distribution.svg" selected>01. Temporal Split &amp; Class Distribution</option>
+              <option value="02_illicit_prevalence_comparison.svg">02. Illicit Prevalence Surge &amp; Domain Shift</option>
+              <option value="03_missing_values_architecture.svg">03. Missingness &amp; Matrix Dimensions</option>
+              <option value="04_feature_transformation_pipeline.svg">04. Feature Scaling &amp; Compression Pipeline</option>
+              <option value="05_graph_topology_summary.svg">05. Graph Topology &amp; Modularity Summary</option>
+              <option value="06_feature_label_correlations.svg">06. Feature-Label Correlation Rankings</option>
+              <option value="07_inter_feature_correlation_heatmap.svg">07. Inter-Feature Correlation Structure</option>
+              <option value="08_outlier_compression_analysis.svg">08. Outlier Compression &amp; Kurtosis Decay</option>
+              <option value="09_class_imbalance_and_entropy.svg">09. Class Imbalance &amp; Shannon Entropy</option>
+              <option value="10_degree_distribution_power_law.svg">10. Power-Law Degree Distribution (In/Out)</option>
+            </select>
+            <a id="figure-raw-link" href="/figures/01_temporal_split_class_distribution.svg" target="_blank" class="px-3 py-1.5 text-xs font-semibold rounded-lg glass-nav-btn text-cyan-300 hover:text-white">
+              Open Raw SVG ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- SVG Preview Container -->
+        <div id="figure-display-container" class="svg-embed-frame w-full rounded-xl bg-[#070b14]/70 border border-white/5 p-4 flex items-center justify-center overflow-hidden min-h-[380px]">
+          <img id="active-figure-img" src="/figures/01_temporal_split_class_distribution.svg" alt="Active Analytics Figure" class="w-full h-auto max-h-[460px] object-contain rounded-lg">
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 2: HIGH-RISK EXPLORER (SUSPICIOUS TRANSACTION LEDGER) -->
+    <!-- ============================================================= -->
+    <div id="view-explorer" class="view-panel hidden space-y-6">
+      
+      <!-- Filter Bar -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="text-violet-400">✦</span> Held-Out Test Suspicious Transactions Ledger
+            </h2>
+            <p class="text-xs text-slate-400">Search and filter across all 67,504 test-period transactions ranked by structural suspicion and calibrated illicit probability.</p>
+          </div>
+          <span class="badge-cyan px-2.5 py-1 rounded-full text-xs font-semibold font-mono">67,504 Ranked Records Active</span>
+        </div>
+
+        <!-- Filter Controls Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold uppercase tracking-wider text-[10px]">Search Transaction ID</label>
+            <input type="text" id="filter-search" oninput="debounceFilter()" placeholder="e.g. 218061363..." class="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold uppercase tracking-wider text-[10px]">Min Calibrated Risk</label>
+            <select id="filter-risk" onchange="fetchSuspicious(1)" class="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+              <option value="0.0">All Scores (&ge; 0.00)</option>
+              <option value="0.10">Elevated (&ge; 0.10)</option>
+              <option value="0.15">High Risk (&ge; 0.15)</option>
+              <option value="0.20" selected>Critical Risk (&ge; 0.20)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold uppercase tracking-wider text-[10px]">Timestep Scope</label>
+            <select id="filter-timestep" onchange="fetchSuspicious(1)" class="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400 font-mono">
+              <option value="all">All Test Timesteps (35–49)</option>
+              <option value="35">Timestep 35</option>
+              <option value="36">Timestep 36</option>
+              <option value="37">Timestep 37</option>
+              <option value="38">Timestep 38</option>
+              <option value="39">Timestep 39</option>
+              <option value="40">Timestep 40</option>
+              <option value="41">Timestep 41</option>
+              <option value="42">Timestep 42</option>
+              <option value="43">Timestep 43</option>
+              <option value="44">Timestep 44</option>
+              <option value="45">Timestep 45</option>
+              <option value="46">Timestep 46</option>
+              <option value="47">Timestep 47</option>
+              <option value="48">Timestep 48</option>
+              <option value="49">Timestep 49</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold uppercase tracking-wider text-[10px]">Page Size</label>
+            <select id="filter-limit" onchange="fetchSuspicious(1)" class="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+              <option value="25" selected>25 records per page</option>
+              <option value="50">50 records per page</option>
+              <option value="100">100 records per page</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Ledger -->
+      <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-[#070b14]/80 border-b border-white/10 text-slate-400 uppercase font-semibold text-[10.5px] tracking-wider">
+              <tr>
+                <th class="py-3 px-4 text-center">Rank</th>
+                <th class="py-3 px-4">Transaction ID</th>
+                <th class="py-3 px-4 text-center">Timestep</th>
+                <th class="py-3 px-4">Calibrated Illicit Risk</th>
+                <th class="py-3 px-4 text-center">In / Out Deg</th>
+                <th class="py-3 px-4 text-center">Scored Neighbors</th>
+                <th class="py-3 px-4 text-right">Neighbor Risk</th>
+                <th class="py-3 px-4 text-right">Suspicion Score</th>
+                <th class="py-3 px-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="suspicious-tbody" class="divide-y divide-white/5 font-mono text-[11.5px]">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="px-5 py-3.5 bg-[#070b14]/80 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <p class="text-slate-400 font-sans" id="pagination-info">Showing records</p>
+          <div class="flex items-center gap-2">
+            <button onclick="changePage(-1)" id="btn-prev" class="px-3 py-1 rounded-lg glass-nav-btn text-white disabled:opacity-30 transition">Previous</button>
+            <span class="text-slate-300 font-mono px-2" id="page-num">1 / 1</span>
+            <button onclick="changePage(1)" id="btn-next" class="px-3 py-1 rounded-lg glass-nav-btn text-white disabled:opacity-30 transition">Next</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 3: MODEL COMPARISON & BENCHMARK -->
+    <!-- ============================================================= -->
+    <div id="view-models" class="view-panel hidden space-y-6">
+      
+      <!-- Header -->
+      <div class="glass-card rounded-2xl p-5 space-y-2">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="text-emerald-400">✦</span> Empirical Detection Model Benchmark
+            </h2>
+            <p class="text-xs text-slate-400">Tested on the 16,670 labeled test transactions (Timesteps 35–49). Standard 0.50 decision cutoff.</p>
+          </div>
+          <span class="badge-emerald px-2.5 py-1 rounded-full text-xs font-semibold font-mono">Ground-Truth Verified (1,083 Illicit Support)</span>
+        </div>
+      </div>
+
+      <!-- Models Benchmark Matrix Table -->
+      <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-[#070b14]/80 border-b border-white/10 text-slate-400 uppercase font-semibold text-[10.5px] tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Architecture</th>
+                <th class="py-3 px-4">Model Class</th>
+                <th class="py-3 px-4 text-right">Precision</th>
+                <th class="py-3 px-4 text-right">Recall</th>
+                <th class="py-3 px-4 text-right">F1 Score</th>
+                <th class="py-3 px-4 text-right">Artifact PR-AUC</th>
+                <th class="py-3 px-4 text-right">Report Ref</th>
+                <th class="py-3 px-4 text-right">Accuracy</th>
+                <th class="py-3 px-4 text-center">Confusion Matrix (TN / FP / FN / TP)</th>
+              </tr>
+            </thead>
+            <tbody id="models-tbody" class="divide-y divide-white/5 font-mono text-xs">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detailed Confusion Matrix Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cm-cards-container">
+        <!-- Dynamically populated via JS -->
+      </div>
+
+      <!-- PR-AUC Discrepancy Diagnostics Note -->
+      <div class="glass-card rounded-2xl p-5 border-l-4 border-l-violet-400 space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-violet-400 font-bold">ℹ</span>
+          <h4 class="text-xs font-bold text-white tracking-wide uppercase font-mono">PR-AUC Empirical Provenance &amp; Early Stopping Diagnosis</h4>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          The <span class="text-cyan-300 font-mono font-bold">Artifact PR-AUC</span> reflects the physical weights saved in <code class="text-slate-300 font-mono">models/*/artifacts/</code> evaluated on CPU. GCN, GraphSAGE, and GRU selected early stopping at validation epoch 1 on CPU due to multi-threaded reduction order differences, yielding test PR-AUCs of 0.4382, 0.5091, and 0.5853 respectively. The <span class="text-violet-300 font-mono font-bold">Report Ref</span> is the historical CUDA GPU benchmark run from <code class="text-slate-300 font-mono">models/comparison_report.md</code>. Logistic Regression matches at 100% (0.4739) across both runs.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 4: TRANSACTION NETWORK (EGO-NETWORK VISUALIZER) -->
+    <!-- ============================================================= -->
+    <div id="view-network" class="view-panel hidden space-y-6">
+      
+      <!-- Query Control Header -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="text-cyan-400">✦</span> Transaction Ego-Network &amp; Directed Payment Flow
+            </h2>
+            <p class="text-xs text-slate-400">Explore Bitcoin predecessor inflows and successor outflows using the 234,355 directed transaction edgelist.</p>
+          </div>
+          <span class="badge-cyan px-2.5 py-1 rounded-full text-xs font-semibold font-mono">234,355 Directed Edges</span>
+        </div>
+
+        <!-- Query Form & Quick Presets -->
+        <div class="flex flex-col sm:flex-row items-center gap-3 pt-1">
+          <input type="text" id="network-tx-input" value="218061363" placeholder="Enter txId (e.g. 218061363)..." class="px-3.5 py-2 text-xs rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400 font-mono w-full sm:w-64">
+          <button onclick="queryNetwork()" class="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-600/30 transition">
+            Visualize Ego-Network
+          </button>
+          
+          <div class="flex items-center gap-1.5 text-xs text-slate-400 flex-wrap">
+            <span>Presets:</span>
+            <button onclick="loadNetworkPill(218061363)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Rank #1 (218061363)</button>
+            <button onclick="loadNetworkPill(194332362)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Rank #2 (194332362)</button>
+            <button onclick="loadNetworkPill(13385567)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Test (13385567)</button>
+            <button onclick="loadNetworkPill(9381)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Divergence (9381)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Network Canvas & Telemetry Split -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        
+        <!-- Canvas Container -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white tracking-wide">Directed Payment Flow Canvas</span>
+            <div class="flex items-center gap-3 text-[11px] font-sans">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block shadow-sm shadow-cyan-400"></span> Target</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block shadow-sm shadow-rose-400"></span> High Risk (&ge;0.20)</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span> Neighbor</span>
+            </div>
+          </div>
+          
+          <div id="network-canvas-container" class="w-full h-80 rounded-xl bg-[#070b14]/80 border border-white/5 flex items-center justify-center overflow-hidden">
+            <!-- Dynamically populated SVG graph -->
+          </div>
+        </div>
+
+        <!-- Node Telemetry Drawer -->
+        <div class="glass-card rounded-2xl p-5 space-y-4 text-xs" id="network-details-panel">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span class="text-cyan-400">◉</span> Ego-Network Summary
+          </h3>
+          <div class="space-y-3 text-slate-300" id="network-details-body">
+            <p class="text-slate-400">Click any transaction node in the canvas to inspect its parameters.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 5: LIVE MODEL INFERENCE CONSOLE -->
+    <!-- ============================================================= -->
+    <div id="view-inference" class="view-panel hidden space-y-6">
+      
+      <!-- Scorer Form Card -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="text-cyan-400">✦</span> On-Demand Live Model Inference Console
+            </h2>
+            <p class="text-xs text-slate-400">Evaluate any held-out test transaction across all four classifier architectures with independent calibrated risk.</p>
+          </div>
+          <span class="badge-cyan px-2.5 py-1 rounded-full text-xs font-semibold font-mono">GCN · GraphSAGE · GRU · Logistic</span>
+        </div>
+
+        <!-- Form Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div>
+            <label class="block text-slate-400 mb-1 text-xs font-semibold uppercase tracking-wider text-[10px]">Transaction ID (Test Period: T35–49)</label>
+            <input type="text" id="infer-tx-input" value="13385567" placeholder="e.g. 13385567" class="w-full px-3.5 py-2 text-xs rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 text-xs font-semibold uppercase tracking-wider text-[10px]">Classifier Model Architecture</label>
+            <select id="infer-model-select" class="w-full px-3.5 py-2 text-xs rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+              <option value="gcn" selected>Graph Convolutional Network (GCN)</option>
+              <option value="graphsage">GraphSAGE Inductive Aggregator</option>
+              <option value="gru">Temporal GRU Recurrent Baseline</option>
+              <option value="logistic">Logistic Regression Reference Baseline</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button onclick="runInference()" id="btn-run-infer" class="w-full px-4 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-600/30 transition flex items-center justify-center gap-2">
+              <span id="infer-spinner" class="hidden animate-spin">⟳</span>
+              <span>Execute Model Inference</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sample Transaction Preset Pills -->
+        <div class="flex items-center gap-2 text-xs text-slate-400 pt-1 flex-wrap">
+          <span>Quick Samples:</span>
+          <button onclick="setInferPill(13385567, 'gcn')" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">13385567 (GCN: Licit)</button>
+          <button onclick="setInferPill(13385567, 'logistic')" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">13385567 (Logistic: Illicit)</button>
+          <button onclick="setInferPill(218061363, 'gcn')" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">218061363 (Rank #1)</button>
+          <button onclick="setInferPill(194332362, 'graphsage')" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">194332362 (Rank #2)</button>
+          <button onclick="setInferPill(9381, 'gru')" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">9381 (T48 Divergence)</button>
+        </div>
+      </div>
+
+      <!-- Live Inference Result Diagnostics Grid -->
+      <div id="infer-output-container" class="space-y-5 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Card 1: Model Prediction -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-cyan-400">
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Model Prediction</p>
+            <p class="text-2xl font-black mt-1 font-mono" id="diag-pred">LICIT</p>
+            <p class="text-[11px] text-slate-400 font-mono mt-0.5" id="diag-pred-sub">GCN · Cutoff 0.50</p>
+          </div>
+
+          <!-- Card 2: Model Softmax Probability -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-blue-400">
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Model Probability</p>
+            <p class="text-2xl font-black text-cyan-400 mt-1 font-mono" id="diag-score">0.3587</p>
+            <p class="text-[11px] text-slate-400 font-mono mt-0.5" id="diag-score-sub">GCN P(Illicit) Softmax</p>
+          </div>
+
+          <!-- Card 3: Calibrated Risk (Platt GRU) -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-amber-400">
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Calibrated Platt Risk</p>
+            <p class="text-2xl font-black text-amber-400 mt-1 font-mono" id="diag-risk">0.1580</p>
+            <p class="text-[11px] text-slate-400 font-mono mt-0.5" id="diag-risk-sub">Validation-Calibrated GRU</p>
+          </div>
+
+          <!-- Card 4: Graph Rank Context -->
+          <div class="glass-card rounded-2xl p-5 border-l-4 border-l-purple-400">
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Graph Rank Context</p>
+            <p class="text-2xl font-black text-purple-400 mt-1 font-mono" id="diag-rank">Rank #50,403</p>
+            <p class="text-[11px] text-slate-400 font-mono mt-0.5" id="diag-deg">In: 0 | Out: 1</p>
+          </div>
+
+        </div>
+
+        <!-- Raw elliptic-inference-v1 JSON Inspector -->
+        <div class="glass-card rounded-2xl p-5 space-y-2">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <span class="text-xs font-bold text-white tracking-wide flex items-center gap-2">
+              <span class="text-cyan-400 font-mono">{}</span> Standard elliptic-inference-v1 Response Document
+            </span>
+            <span class="badge-emerald px-2 py-0.5 rounded text-[10.5px] font-mono">Status: scored</span>
+          </div>
+          <pre id="infer-json-pre" class="p-4 rounded-xl bg-[#070b14]/90 border border-white/5 text-xs font-mono text-cyan-200 overflow-x-auto max-h-96"></pre>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================================= -->
+  <!-- FOOTER -->
+  <!-- ============================================================= -->
+  <footer class="glass-card border-t border-white/10 py-4 px-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span class="font-mono text-slate-400">Elliptic++ Forensic Suite · Pure Python Standard-Library HTTP Engine</span>
+      <span class="text-slate-500 text-[11px]">Strict Inductive Protocol · Timesteps 35–49 · Zero Fabricated Metrics</span>
+    </div>
+  </footer>
+
+  <!-- ============================================================= -->
+  <!-- CLIENT JAVASCRIPT LOGIC -->
+  <!-- ============================================================= -->
+  <script>
+    let activeView = 'overview';
+    let currentPage = 1;
+    let debounceTimer = null;
+
+    // View Navigation Switcher
+    function switchView(viewName) {
+      activeView = viewName;
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
+      const activeEl = document.getElementById('view-' + viewName);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      document.querySelectorAll('.glass-nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + viewName);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (viewName === 'overview') fetchOverview();
+      else if (viewName === 'explorer') fetchSuspicious(currentPage);
+      else if (viewName === 'models') fetchModels();
+      else if (viewName === 'network') queryNetwork();
+    }
+
+    // --- Overview Logic ---
+    function fetchOverview() {
+      fetch('/api/overview')
+        .then(res => res.json())
+        .then(data => {
+          if (!data || !data.dataset_overview) return;
+          const ds = data.dataset_overview;
+          const risk = data.risk_scoring_overview || {};
+          const graph = data.graph_topology || {};
+
+          document.getElementById('kpi-test-txs').textContent = (ds.held_out_test_transactions || 67504).toLocaleString();
+          document.getElementById('kpi-illicit-rate').textContent = (ds.test_illicit_prevalence_pct || 6.4967).toFixed(4) + '%';
+          document.getElementById('kpi-elevated-matches').textContent = (risk.elevated_risk_transactions_ge_0_2 || 35062).toLocaleString();
+          document.getElementById('kpi-modularity').textContent = (graph.louvain_modularity || 0.9796).toFixed(4);
+        })
+        .catch(err => console.error("Overview fetch error:", err));
+    }
+
+    function loadSelectedFigure() {
+      const figName = document.getElementById('figure-select').value;
+      const img = document.getElementById('active-figure-img');
+      const link = document.getElementById('figure-raw-link');
+      const path = '/figures/' + figName;
+      img.src = path;
+      link.href = path;
+    }
+
+    // --- High-Risk Explorer Logic ---
+    function renderSuspiciousTable(records) {
+      const tbody = document.getElementById('suspicious-tbody');
+      tbody.innerHTML = '';
+      if (!records || records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500 font-sans">No matching transactions found.</td></tr>`;
+        return;
+      }
+
+      records.forEach(r => {
+        const risk = parseFloat(r.calibrated_illicit_risk);
+        const isCritical = risk >= 0.20;
+        const badgeColor = isCritical ? 'badge-rose' : 'badge-amber';
+        
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-white/5 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 text-center text-slate-400">#${r.rank}</td>
+          <td class="py-2.5 px-4 font-bold text-white">${r.txId}</td>
+          <td class="py-2.5 px-4 text-center text-slate-400">T${r.timestep}</td>
+          <td class="py-2.5 px-4">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${badgeColor}">${risk.toFixed(4)}</span>
+          </td>
+          <td class="py-2.5 px-4 text-center text-slate-300">${r.in_degree} / ${r.out_degree}</td>
+          <td class="py-2.5 px-4 text-center text-slate-300">${r.scored_neighbors}</td>
+          <td class="py-2.5 px-4 text-right text-slate-400">${r.mean_neighbor_risk ? r.mean_neighbor_risk.toFixed(4) : '-'}</td>
+          <td class="py-2.5 px-4 text-right font-bold text-cyan-400">${r.suspicion_score.toFixed(4)}</td>
+          <td class="py-2.5 px-4 text-center">
+            <div class="flex items-center justify-center gap-1.5 font-sans">
+              <button onclick="inspectTransaction(${r.txId})" class="px-2 py-1 rounded bg-[#070b14] hover:bg-cyan-900/40 border border-white/10 text-[11px] text-cyan-300 font-semibold transition">Ego-Net</button>
+              <button onclick="inspectForInference(${r.txId})" class="px-2 py-1 rounded bg-[#070b14] hover:bg-violet-900/40 border border-white/10 text-[11px] text-violet-300 font-semibold transition">Infer</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function fetchSuspicious(page = 1) {
+      currentPage = page;
+      const search = document.getElementById('filter-search').value.trim();
+      const minRisk = document.getElementById('filter-risk').value;
+      const timestep = document.getElementById('filter-timestep').value;
+      const limit = document.getElementById('filter-limit').value;
+
+      fetch(`/api/suspicious?page=${page}&limit=${limit}&min_risk=${minRisk}&timestep=${timestep}&search=${encodeURIComponent(search)}`)
+        .then(res => res.json())
+        .then(data => {
+          renderSuspiciousTable(data.records);
+          document.getElementById('pagination-info').textContent = `Showing page ${data.page} of ${data.total_pages} (${data.total_matches.toLocaleString()} matching records)`;
+          document.getElementById('page-num').textContent = `${data.page} / ${data.total_pages}`;
+          document.getElementById('btn-prev').disabled = (data.page <= 1);
+          document.getElementById('btn-next').disabled = (data.page >= data.total_pages);
+        })
+        .catch(err => console.error("Suspicious fetch error:", err));
+    }
+
+    function debounceFilter() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchSuspicious(1), 300);
+    }
+
+    function changePage(delta) {
+      fetchSuspicious(currentPage + delta);
+    }
+
+    function inspectTransaction(txId) {
+      document.getElementById('network-tx-input').value = txId;
+      document.getElementById('infer-tx-input').value = txId;
+      switchView('network');
+      queryNetwork();
+    }
+
+    function inspectForInference(txId) {
+      document.getElementById('infer-tx-input').value = txId;
+      switchView('inference');
+      runInference();
+    }
+
+    // --- Model Benchmark Comparison Logic ---
+    function fetchModels() {
+      fetch('/api/models')
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('models-tbody');
+          tbody.innerHTML = '';
+          const container = document.getElementById('cm-cards-container');
+          container.innerHTML = '';
+
+          data.models.forEach(m => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-white/5 transition';
+            const cm = m.confusion_matrix;
+            const benchPR = m.benchmark_pr_auc ? m.benchmark_pr_auc.toFixed(4) : m.pr_auc.toFixed(4);
+
+            tr.innerHTML = `
+              <td class="py-3 px-4 font-bold text-white">${m.name}</td>
+              <td class="py-3 px-4 text-slate-400 font-sans">${m.type}</td>
+              <td class="py-3 px-4 text-right font-bold text-cyan-400">${(m.precision * 100).toFixed(2)}%</td>
+              <td class="py-3 px-4 text-right font-bold text-emerald-400">${(m.recall * 100).toFixed(2)}%</td>
+              <td class="py-3 px-4 text-right font-bold text-amber-400">${m.f1.toFixed(4)}</td>
+              <td class="py-3 px-4 text-right font-bold text-cyan-300">${m.pr_auc.toFixed(4)}</td>
+              <td class="py-3 px-4 text-right font-bold text-violet-300 font-sans">${benchPR}</td>
+              <td class="py-3 px-4 text-right text-slate-300">${(m.accuracy * 100).toFixed(2)}%</td>
+              <td class="py-3 px-4 text-center text-slate-400 text-[11px]">${cm.tn.toLocaleString()} / ${cm.fp.toLocaleString()} / ${cm.fn.toLocaleString()} / ${cm.tp.toLocaleString()}</td>
+            `;
+            tbody.appendChild(tr);
+
+            // Detailed Confusion Matrix Card
+            const card = document.createElement('div');
+            card.className = 'glass-card rounded-2xl p-4 space-y-3';
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-white">${m.name}</h4>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded badge-cyan font-bold">F1: ${m.f1.toFixed(4)}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 font-sans">${m.architecture}</p>
+              
+              <div class="grid grid-cols-2 gap-2 text-center text-xs font-mono pt-1">
+                <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60">
+                  <span class="block text-[10px] text-emerald-400 uppercase font-sans font-semibold">True Negative (Licit)</span>
+                  <span class="text-sm font-bold text-white">${cm.tn.toLocaleString()}</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
+                  <span class="block text-[10px] text-rose-400 uppercase font-sans font-semibold">False Positive</span>
+                  <span class="text-sm font-bold text-rose-300">${cm.fp.toLocaleString()}</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
+                  <span class="block text-[10px] text-rose-400 uppercase font-sans font-semibold">False Negative</span>
+                  <span class="text-sm font-bold text-rose-300">${cm.fn.toLocaleString()}</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60">
+                  <span class="block text-[10px] text-emerald-400 uppercase font-sans font-semibold">True Positive (Illicit)</span>
+                  <span class="text-sm font-bold text-emerald-300">${cm.tp.toLocaleString()}</span>
+                </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(err => console.error("Models fetch error:", err));
+    }
+
+    // --- Ego-Network Visualizer Logic ---
+    function queryNetwork() {
+      const txId = document.getElementById('network-tx-input').value.trim();
+      if (!txId) return;
+
+      fetch(`/api/network?tx_id=${txId}`)
+        .then(res => res.json())
+        .then(data => renderNetworkGraph(data))
+        .catch(err => console.error("Network fetch error:", err));
+    }
+
+    function loadNetworkPill(txId) {
+      document.getElementById('network-tx-input').value = txId;
+      queryNetwork();
+    }
+
+    function renderNetworkGraph(data) {
+      const container = document.getElementById('network-canvas-container');
+      const detailsBody = document.getElementById('network-details-body');
+      
+      if (!data || !data.nodes || data.nodes.length === 0) {
+        container.innerHTML = '<span class="text-xs text-slate-500">Transaction isolated or not found in edgelist.</span>';
+        detailsBody.innerHTML = '<span class="text-xs text-slate-500">No connectivity records for this ID.</span>';
+        return;
+      }
+
+      const c = data.center_node;
+      detailsBody.innerHTML = `
+        <div class="space-y-2 border-b border-white/10 pb-3 font-mono">
+          <div class="flex justify-between"><span class="text-slate-400 font-sans">Target txId:</span> <strong class="text-cyan-300">${c.txId}</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400 font-sans">Calibrated Risk:</span> <strong class="${c.calibrated_risk && c.calibrated_risk >= 0.20 ? 'text-rose-400' : 'text-slate-200'}">${c.calibrated_risk !== null ? c.calibrated_risk.toFixed(4) : 'N/A'}</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400 font-sans">Timestep:</span> <strong class="text-slate-200">T${c.timestep || 'N/A'}</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400 font-sans">Inflows / Outflows:</span> <strong class="text-slate-200">${data.total_inflows} / ${data.total_outflows}</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400 font-sans">Total Degree:</span> <strong class="text-slate-200">${data.total_degree}</strong></div>
+        </div>
+        <div class="pt-2">
+          <button onclick="inspectForInference(${c.txId})" class="w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs shadow transition">
+            Score txId ${c.txId} with Live Inference →
+          </button>
+        </div>
+      `;
+
+      // Draw SVG layout
+      const w = 580, h = 300;
+      const cx = w / 2, cy = h / 2;
+      const nodePos = {};
+      nodePos[c.txId] = { x: cx, y: cy, label: c.txId, color: "#38bdf8", is_center: true, risk: c.calibrated_risk };
+
+      // Inflows on left
+      const inflows = data.nodes.filter(n => n.relation === 'inflow');
+      inflows.forEach((n, idx) => {
+        const offset = (idx - (inflows.length - 1) / 2) * (240 / Math.max(inflows.length, 1));
+        const nx = cx - 180;
+        const ny = cy + offset;
+        const color = (n.calibrated_risk && n.calibrated_risk >= 0.20) ? "#f43f5e" : "#94a3b8";
+        nodePos[n.txId] = { x: nx, y: ny, label: n.txId, color: color, risk: n.calibrated_risk };
+      });
+
+      // Outflows on right
+      const outflows = data.nodes.filter(n => n.relation === 'outflow');
+      outflows.forEach((n, idx) => {
+        const offset = (idx - (outflows.length - 1) / 2) * (240 / Math.max(outflows.length, 1));
+        const nx = cx + 180;
+        const ny = cy + offset;
+        const color = (n.calibrated_risk && n.calibrated_risk >= 0.20) ? "#f43f5e" : "#34d399";
+        nodePos[n.txId] = { x: nx, y: ny, label: n.txId, color: color, risk: n.calibrated_risk };
+      });
+
+      let svg = [`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="w-full h-full">`];
+      svg.push(`
+        <defs>
+          <marker id="arrow-in" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+          </marker>
+          <marker id="arrow-out" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399" />
+          </marker>
+        </defs>
+      `);
+
+      // Draw Edges
+      data.edges.forEach(e => {
+        const p1 = nodePos[e.source];
+        const p2 = nodePos[e.target];
+        if (p1 && p2) {
+          const isOut = (e.source === c.txId);
+          const stroke = isOut ? "#34d399" : "#38bdf8";
+          const marker = isOut ? "url(#arrow-out)" : "url(#arrow-in)";
+          svg.push(`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${stroke}" stroke-width="2" marker-end="${marker}" stroke-opacity="0.6"/>`);
+        }
+      });
+
+      // Draw Nodes
+      Object.keys(nodePos).forEach(k => {
+        const p = nodePos[k];
+        const r = p.is_center ? 18 : 12;
+        svg.push(`<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${p.color}" stroke="#070b14" stroke-width="3" cursor="pointer" onclick="inspectTransaction(${k})"/>`);
+        svg.push(`<text x="${p.x}" y="${p.y + (p.is_center ? 30 : 24)}" font-family="monospace" font-size="10" fill="#cbd5e1" text-anchor="middle" font-weight="bold">${p.label}</text>`);
+      });
+
+      svg.push('</svg>');
+      container.innerHTML = svg.join('');
+    }
+
+    // --- Live Inference Console Logic ---
+    function setInferPill(txId, model) {
+      document.getElementById('infer-tx-input').value = txId;
+      document.getElementById('infer-model-select').value = model;
+      runInference();
+    }
+
+    function runInference() {
+      const txId = document.getElementById('infer-tx-input').value.trim();
+      const model = document.getElementById('infer-model-select').value;
+      const btn = document.getElementById('btn-run-infer');
+      const spinner = document.getElementById('infer-spinner');
+      const outContainer = document.getElementById('infer-output-container');
+
+      if (!txId) return;
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+
+      fetch('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tx_id: txId, model: model })
+      })
+      .then(res => res.json())
+      .then(data => {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        outContainer.classList.remove('hidden');
+
+        document.getElementById('infer-json-pre').textContent = JSON.stringify(data, null, 2);
+
+        const rec = data.record || {};
+        const modelName = (rec.requested_model || model).toUpperCase();
+        const pred = rec.model_output ? rec.model_output.prediction : 'unsupported';
+        const isIllicit = pred === 'illicit';
+        
+        const predEl = document.getElementById('diag-pred');
+        predEl.textContent = pred.toUpperCase();
+        predEl.className = 'text-2xl font-black mt-1 font-mono ' + (isIllicit ? 'text-rose-400' : (pred === 'licit' ? 'text-emerald-400' : 'text-slate-400'));
+        
+        const subPred = document.getElementById('diag-pred-sub');
+        if (subPred) subPred.textContent = `${modelName} · Cutoff 0.50`;
+
+        const scoreVal = (rec.model_output && rec.model_output.score !== null) ? rec.model_output.score.toFixed(4) : '-';
+        document.getElementById('diag-score').textContent = scoreVal;
+        const subScore = document.getElementById('diag-score-sub');
+        if (subScore) subScore.textContent = `${modelName} P(Illicit) Softmax`;
+
+        const riskVal = (rec.risk && rec.risk.score !== null) ? rec.risk.score.toFixed(4) : '-';
+        document.getElementById('diag-risk').textContent = riskVal;
+        const subRisk = document.getElementById('diag-risk-sub');
+        if (subRisk) subRisk.textContent = 'Validation-Calibrated GRU';
+
+        if (rec.suspicious_connection) {
+          document.getElementById('diag-rank').textContent = `Rank #${rec.suspicious_connection.rank.toLocaleString()}`;
+        } else {
+          document.getElementById('diag-rank').textContent = 'Rank: N/A';
+        }
+
+        if (rec.graph_statistics) {
+          document.getElementById('diag-deg').textContent = `In: ${rec.graph_statistics.in_degree} | Out: ${rec.graph_statistics.out_degree}`;
+        } else {
+          document.getElementById('diag-deg').textContent = 'Degrees: N/A';
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        console.error("Inference fetch error:", err);
+      });
+    }
+
+    // Initial load
+    fetchOverview();
+    fetchSuspicious(1);
+  </script>
+</body>
+</html>

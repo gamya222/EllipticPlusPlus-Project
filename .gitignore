@@ -1,9 +1,16 @@
 # Python virtual environment
 .venv/
+venv/
 
 # Python cache
 __pycache__/
 *.pyc
+
+# Local environment files and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
 
 # Raw dataset - too large for GitHub
 data/raw/
@@ -23,3 +30,23 @@ models/*/artifacts/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Generated evaluation and preprocessing outputs
+dashboard/test_model_predictions.csv
+preprocessing/figures/
+preprocessing/comprehensive_preprocessing_metrics.json
+preprocessing/feature_correlations.csv
+preprocessing/feature_statistics.csv
+preprocessing/imputation_evaluation_metrics.csv
+preprocessing/imputation_evaluation_summary.json
+preprocessing/inter_feature_correlation_matrix.csv
+preprocessing/outlier_analysis.csv
+preprocessing/preprocessing_matrix_dashboard.html
+preprocessing/preprocessing_matrix_report.md
+preprocessing/preprocessing_metrics_dictionary.csv
+preprocessing/preprocessing_results_matrix.json
+preprocessing/preprocessing_splits_summary.csv
+preprocessing/timestep_distribution.csv
+
+# Local scratch output accidentally created by a pager
+tall pytest

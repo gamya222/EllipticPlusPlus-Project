@@ -1,0 +1,111 @@
+/* =========================================================================
+   Elliptic++ Fixed Dock Navigation (Larger, Legible, Compact, Never Overlaps)
+   - Height: 58px for high legibility and easy touch/click targets
+   - Typography: 14px font with bold active indicators
+   - Clear contrast against rich midnight background
+   - Generous bottom clearance via 160px container padding
+   ========================================================================= */
+
+.floating-dock {
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 24px !important;
+  transform: translateX(-50%) !important;
+  z-index: 100 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  max-width: 680px !important;
+  width: calc(100% - 36px) !important;
+  height: 58px !important;
+  padding: 6px 8px !important;
+  border: 1px solid rgba(120, 170, 245, 0.32) !important;
+  border-radius: 9999px !important;
+  background: rgba(14, 24, 52, 0.92) !important;
+  backdrop-filter: blur(28px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 24px rgba(34, 211, 238, 0.12) !important;
+}
+
+.dock-btn {
+  flex: 1 1 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  height: 44px !important;
+  padding: 8px 14px !important;
+  border: 1px solid transparent !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dock-btn:hover {
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dock-btn.active {
+  color: #ffffff !important;
+  border-color: rgba(34, 211, 238, 0.55) !important;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.24), rgba(168, 85, 247, 0.2)) !important;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.22) !important;
+}
+
+.dock-btn svg {
+  flex: 0 0 auto !important;
+}
+
+.dock-index {
+  display: inline-block !important;
+  color: #38bdf8 !important;
+  font: 700 12px/1 'DM Mono', monospace !important;
+  letter-spacing: 0.05em !important;
+}
+
+.dock-btn.active .dock-index {
+  color: #22d3ee !important;
+}
+
+.dock-label {
+  display: inline-block !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+@media (max-width: 768px) {
+  .floating-dock {
+    bottom: 16px !important;
+    height: 52px !important;
+    padding: 4px 6px !important;
+    max-width: calc(100% - 24px) !important;
+  }
+  .dock-btn {
+    height: 40px !important;
+    padding: 6px 10px !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+  }
+  .dock-label {
+    font-size: 12.5px !important;
+  }
+}
+
+@media (max-width: 580px) {
+  .dock-index {
+    display: none !important;
+  }
+  .dock-label {
+    font-size: 11.5px !important;
+  }
+}
