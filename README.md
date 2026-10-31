@@ -43,6 +43,8 @@ flowchart LR
   E --> G
   F --> G
   G --> H[elliptic-inference-v1 JSON]
+  G --> I[Python dashboard API]
+  I --> J[Next.js dashboard]
 ```
 
 Preprocessing uses PySpark to join the feature and class tables, split at
@@ -51,6 +53,14 @@ NumPy/PyArrow support feature and Parquet processing. Graph summaries use
 NumPy and NetworkX 3.7 Louvain. The inference interface reuses saved
 checkpoints/transforms, calibration, and graph-analytics CSVs; it does not
 retrain or regenerate those artifacts.
+
+The local dashboard consists of a Next.js frontend in `frontend/` and a
+Python standard-library HTTP API in `dashboard/server.py`. The frontend uses
+Next.js rewrites to call the API at `127.0.0.1:8080`; the API serves overview,
+suspicious-transaction, model-metric, ego-network, and on-demand score routes.
+It reads the raw edge CSV, processed transaction/edge Parquet, saved model and
+graph artifacts. On-demand scoring reuses `models.inference.EllipticInference`;
+it does not train models. The server binds to loopback only.
 
 The current WSL environment was checked with Python 3.14.4, PyTorch
 2.13.0+cu132 (CUDA 13.2; CUDA available), PyArrow 26.0.0, PySpark 4.2.0, and
@@ -201,6 +211,131 @@ causal explanations are not present in these data or inferred by this project.
 
 Raw data (`data/raw/`), processed data (`data/processed/`), and generated model
 artifacts (`models/*/artifacts/`) are excluded by `.gitignore`. Checkpoints and
-results are local artifacts and must be present to run inference. No dashboard,
-web API, or incremental unseen-transaction scoring is implemented in this
-phase.
+results are local artifacts and must be present to run inference. Scoring
+unseen transactions incrementally is not implemented.
+
+## Local dashboard
+
+Run both the Python backend and Next.js frontend inside the same Ubuntu WSL
+distribution. This keeps the frontend's API rewrite to `127.0.0.1:8080` on the
+same Linux loopback as the backend. The backend binds to `127.0.0.1:8080`; the
+Next.js development server binds to `0.0.0.0:3000` so Windows can reach it
+through WSL localhost forwarding. No Windows-to-WSL relay or firewall change is
+needed. This is a local development configuration, not a production network
+deployment.
+
+### One-time frontend setup in WSL
+
+The verified Ubuntu WSL setup uses Node.js 22.22.1 and npm 9.2.0 from Ubuntu's
+package repository. If Node.js is not installed in that WSL distribution, use
+its configured Ubuntu repository (this does not change Windows Node.js):
+
+```bash
+sudo apt update
+sudo apt install nodejs npm
+node --version
+npm --version
+```
+
+Do not reuse the Windows `frontend/node_modules` inside Linux. Create a separate
+Linux-home copy of the current frontend source and configuration, excluding the
+Windows dependencies and build output. The repository contains both npm and
+pnpm lockfiles, and `package.json` names pnpm as its package manager. The
+following tested setup deliberately uses the checked-in `package-lock.json`
+with `npm ci`; keep the lockfiles consistent if changing dependencies.
+
+```bash
+mkdir -p ~/elliptic-plus-dashboard/frontend
+tar -C /mnt/d/BDE_Project/EllipticPlusPlus-Project/frontend \
+  --exclude=node_modules --exclude=.next -cf - . \
+  | tar -C ~/elliptic-plus-dashboard/frontend -xf -
+cd ~/elliptic-plus-dashboard/frontend
+export PATH=/usr/bin:/bin:$PATH
+npm ci
+```
+
+Repeat the `tar` copy command after changing frontend source or configuration
+in the repository. It updates the Linux copy without copying Windows
+`node_modules` or `.next`. Run `npm ci` again only when the dependency lockfile
+changes or the Linux dependencies need to be restored.
+
+### Start the services
+
+Open two Ubuntu WSL terminals and keep both running.
+
+**Terminal 1 — Python backend:**
+
+```bash
+cd /mnt/d/BDE_Project/EllipticPlusPlus-Project
+source /home/nishchay/.venvs/elliptic-plus/bin/activate
+export TORCH_USE_RTLD_GLOBAL=1
+python -u dashboard/server.py 8080
+```
+
+**Terminal 2 — Next.js frontend:**
+
+```bash
+cd /home/nishchay/elliptic-plus-dashboard/frontend
+export PATH=/usr/bin:/bin:$PATH
+hash -r
+which node
+which npm
+npm run dev -- --hostname 0.0.0.0 --port 3000
+```
+
+`which node` should report `/usr/bin/node`, not a path under `/mnt/c`. Wait for
+Next.js to report `Ready`, then open `http://localhost:3000` in the Windows
+browser. Check the API from Ubuntu with:
+
+```bash
+curl -i http://127.0.0.1:8080/api/overview
+curl -i http://127.0.0.1:3000/api/overview
+```
+
+Both should return HTTP 200. The second request verifies the Next.js `/api/*`
+rewrite to the backend. If the page says it is connecting to the backend, first
+confirm both terminals are Ubuntu WSL terminals and that both commands are
+still running; do not start a second server on an occupied port.
+
+The first score request initializes the inference engine and loads existing
+transaction/graph data and checkpoints into memory; allow several minutes and
+roughly 1–2 GB host RAM for that first request. It performs inference only.
+Native transaction scoring requires the WSL Python virtual environment and
+`TORCH_USE_RTLD_GLOBAL=1`. Without PyTorch or the optional cached prediction
+CSV, known test transactions can be identified but model inference is reported
+unavailable; the backend will not substitute another model's score.
+
+The frontend uses one Next.js page with hash-addressable client views: Overview,
+Explorer, Model Lab, Network, Inference, Metrics, and Graph Gallery. It calls
+the backend through the `/api/*` rewrite in `frontend/next.config.mjs`. The
+read-only evaluation endpoints are `GET /api/evaluation` and `GET /api/graphs`;
+PNG files are exposed at `/api/metric-graphs/<task>/<metric>_comparison.png`.
+The JSON responses report undefined/unavailable values explicitly. MAPE is
+undefined for the binary target when true labels include zero. Graph Gallery
+images are code-generated PNG outputs from the saved evaluation CSVs, not plots
+recomputed by the browser at runtime. Regenerate them with
+`python -m evaluation_metrics.graphs.generate_all_graphs` when updated CSV
+results should be reflected; this updates the PNG files in
+`evaluation_metrics/graphs/`.
+
+Troubleshooting:
+
+- Start both processes in separate terminals. The Python server alone does
+  not start the Next.js frontend; open port 3000 for the frontend.
+- If port 3000 or 8080 is already occupied, choose an unused port. If changing
+  the backend port, update `frontend/next.config.mjs` to the same loopback
+  backend address, then restart Next.js.
+- If port 3000 is occupied, start the frontend with
+  `npm run dev -- --hostname 0.0.0.0 --port 3001` and open
+  `http://localhost:3001`.
+- Native transaction scoring requires the existing WSL virtual environment
+  and `TORCH_USE_RTLD_GLOBAL=1` shown above. If the backend runs under a Python
+  environment without PyTorch and without the optional cached prediction CSV,
+  it will identify known test transactions but report their model inference as
+  unavailable; it will not substitute the calibrated risk for another model's
+  score.
+- If the page shows a backend connection or evaluation error, check that the
+  backend is listening at `http://127.0.0.1:8080/api/overview` and that the
+  local model/evaluation artifacts exist.
+- The first inference request may take several minutes to load model artifacts;
+  evaluation tables and generated PNGs are read without model training.

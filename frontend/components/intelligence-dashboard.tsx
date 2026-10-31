@@ -8,7 +8,9 @@ import {
   AlertTriangle,
   ArrowRight,
   BrainCircuit,
+  ChartNoAxesCombined,
   Database,
+  Images,
   Network,
   RefreshCw,
   Search,
@@ -18,13 +20,13 @@ import {
 } from 'lucide-react'
 import { fetchBackend, numberValue, records, type ApiRecord } from '@/lib/backend-api'
 
-const cyan = '#22d3ee'
-const violet = '#a855f7'
-const coral = '#f43f5e'
-const amber = '#fbbf24'
-const emerald = '#34d399'
+const cyan = '#596b45'
+const violet = '#b58b32'
+const coral = '#a95543'
+const amber = '#c69b45'
+const emerald = '#71834f'
 
-type ViewId = 'overview' | 'explorer' | 'models' | 'network' | 'inference'
+type ViewId = 'overview' | 'explorer' | 'models' | 'network' | 'inference' | 'metrics' | 'graphs'
 type Feed = { mutate: () => void }
 
 const nav: Array<{ id: ViewId; label: string; icon: typeof Activity; index: string }> = [
@@ -33,6 +35,8 @@ const nav: Array<{ id: ViewId; label: string; icon: typeof Activity; index: stri
   { id: 'models', label: 'Model Lab', icon: BrainCircuit, index: '03' },
   { id: 'network', label: 'Network', icon: Network, index: '04' },
   { id: 'inference', label: 'Inference', icon: Zap, index: '05' },
+  { id: 'metrics', label: 'Metrics', icon: ChartNoAxesCombined, index: '06' },
+  { id: 'graphs', label: 'Graph Gallery', icon: Images, index: '07' },
 ]
 
 function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -111,221 +115,83 @@ function SectionHead({ eyebrow, title, meta }: { eyebrow: string; title: string;
   )
 }
 
-/* =========================================================================
-   One Large Elegant Transaction-Flow Visualization (Illustrative Schematic)
-   - Clean, purposeful nodes indicating topological roles
-   - Smooth directional paths with arrow corridors
-   - Clearly marked illustrative schematic; dynamic top entity linked from data
-   - Prominent 13px legend
-   ========================================================================= */
-function FlowField({ topEntityId }: { topEntityId?: string }) {
-  const targetLabel = topEntityId ? `Tx ${topEntityId} [Target Hub]` : 'Flagged Entity Hub'
-
+/* Graph views are built only from the saved graph summary and edge artifacts. */
+function GraphSummaryPanel({ overviewData }: { overviewData?: ApiRecord }) {
+  const topology = (overviewData?.graph_topology as ApiRecord) || undefined
   return (
-    <div className="flow-field">
+    <div className="flow-field graph-summary-panel">
       <div className="flow-field-head">
-        <div className="flow-head-left">
-          <i className="live-dot" />
-          <span>Illustrative Flow Schematic · Directed Edge Topology</span>
-        </div>
-        <div className="flow-head-right">
-          <span>SOURCE → AGGREGATION → HUB → EGRESS</span>
-        </div>
+        <div className="flow-head-left"><Network size={16} /> Graph summary from saved artifacts</div>
+        <span className="flow-head-right">FULL-GRAPH DESCRIPTIVE</span>
       </div>
-
-      <div className="flow-canvas">
-        <svg
-          viewBox="0 0 960 380"
-          role="img"
-          aria-label="Illustrative directional transaction flow schematic showing Bitcoin communities and risk propagation"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <defs>
-            <linearGradient id="flow-grad-cyan" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.85" />
-            </linearGradient>
-            <linearGradient id="flow-grad-risk" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.95" />
-            </linearGradient>
-
-            <filter id="subtle-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2.2" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <marker id="arrow-cyan" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="3.5" markerHeight="3.5" orient="auto">
-              <path d="M 0 1 L 7 4 L 0 7 z" fill="#22d3ee" fillOpacity="0.85" />
-            </marker>
-            <marker id="arrow-violet" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="3.5" markerHeight="3.5" orient="auto">
-              <path d="M 0 1 L 7 4 L 0 7 z" fill="#a855f7" fillOpacity="0.85" />
-            </marker>
-            <marker id="arrow-risk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="3.8" markerHeight="3.8" orient="auto">
-              <path d="M 0 1 L 7 4 L 0 7 z" fill="#f43f5e" fillOpacity="0.95" />
-            </marker>
-            <marker id="arrow-slate" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="3.5" markerHeight="3.5" orient="auto">
-              <path d="M 0 1 L 7 4 L 0 7 z" fill="#94a3b8" fillOpacity="0.6" />
-            </marker>
-          </defs>
-
-          {/* 1. Community Regions */}
-          <g className="community-regions">
-            <rect x="25" y="30" width="185" height="320" rx="14" fill="rgba(34,211,238,0.03)" stroke="rgba(34,211,238,0.2)" strokeDasharray="5 5" strokeWidth="1.2" />
-            <text x="40" y="54" fill="rgba(34,211,238,0.85)" fontFamily="var(--font-mono, monospace)" fontSize="11" fontWeight="700" letterSpacing="0.08em">
-              COMMUNITY 01 · INFLOW
-            </text>
-
-            <rect x="245" y="30" width="225" height="320" rx="14" fill="rgba(168,85,247,0.03)" stroke="rgba(168,85,247,0.2)" strokeDasharray="5 5" strokeWidth="1.2" />
-            <text x="260" y="54" fill="rgba(168,85,247,0.85)" fontFamily="var(--font-mono, monospace)" fontSize="11" fontWeight="700" letterSpacing="0.08em">
-              COMMUNITY 14 · AGGREGATION
-            </text>
-
-            <rect x="505" y="30" width="225" height="320" rx="14" fill="rgba(244,63,94,0.035)" stroke="rgba(244,63,94,0.25)" strokeDasharray="5 5" strokeWidth="1.2" />
-            <text x="520" y="54" fill="rgba(244,63,94,0.9)" fontFamily="var(--font-mono, monospace)" fontSize="11" fontWeight="700" letterSpacing="0.08em">
-              COMMUNITY 28 · SUSPICIOUS HUB
-            </text>
-
-            <rect x="765" y="30" width="170" height="320" rx="14" fill="rgba(34,211,238,0.03)" stroke="rgba(34,211,238,0.2)" strokeDasharray="5 5" strokeWidth="1.2" />
-            <text x="780" y="54" fill="rgba(34,211,238,0.85)" fontFamily="var(--font-mono, monospace)" fontSize="11" fontWeight="700" letterSpacing="0.08em">
-              SETTLEMENT &amp; EGRESS
-            </text>
-          </g>
-
-          {/* 2. Directional Transfer Paths */}
-          <g className="flow-paths">
-            <path d="M 130 115 C 195 115, 240 135, 335 135" fill="none" stroke="rgba(34,211,238,0.5)" strokeWidth="1.8" markerEnd="url(#arrow-cyan)" />
-            <path d="M 130 195 C 205 195, 245 145, 335 135" fill="none" stroke="rgba(34,211,238,0.45)" strokeWidth="1.8" markerEnd="url(#arrow-cyan)" />
-            <path d="M 130 195 C 205 195, 250 255, 355 255" fill="none" stroke="rgba(168,85,247,0.45)" strokeWidth="1.8" markerEnd="url(#arrow-violet)" />
-            <path d="M 130 275 C 215 275, 260 260, 355 255" fill="none" stroke="rgba(34,211,238,0.5)" strokeWidth="1.8" markerEnd="url(#arrow-cyan)" />
-
-            <path d="M 365 135 C 480 105, 680 105, 805 115" fill="none" stroke="rgba(148,163,184,0.4)" strokeWidth="1.8" markerEnd="url(#arrow-slate)" />
-            <path d="M 365 135 C 455 135, 485 180, 580 185" fill="none" stroke="url(#flow-grad-risk)" strokeWidth="2.4" strokeDasharray="6 3" markerEnd="url(#arrow-risk)" filter="url(#subtle-glow)" />
-
-            <path d="M 385 255 C 475 255, 500 195, 580 185" fill="none" stroke="url(#flow-grad-risk)" strokeWidth="2.2" strokeDasharray="6 3" markerEnd="url(#arrow-risk)" />
-            <path d="M 385 255 C 465 255, 505 285, 605 285" fill="none" stroke="rgba(168,85,247,0.45)" strokeWidth="1.8" markerEnd="url(#arrow-violet)" />
-
-            <path d="M 615 185 C 690 185, 730 215, 805 215" fill="none" stroke="#f43f5e" strokeWidth="2.6" strokeOpacity="0.9" markerEnd="url(#arrow-risk)" filter="url(#subtle-glow)" />
-            <path d="M 615 185 C 685 170, 730 130, 805 115" fill="none" stroke="rgba(168,85,247,0.45)" strokeWidth="1.8" markerEnd="url(#arrow-violet)" />
-            <path d="M 625 285 C 705 285, 745 295, 805 295" fill="none" stroke="rgba(148,163,184,0.4)" strokeWidth="1.8" markerEnd="url(#arrow-slate)" />
-
-            <circle r="2.5" fill="#22d3ee" filter="url(#subtle-glow)">
-              <animateMotion dur="5.2s" repeatCount="indefinite" path="M 130 115 C 195 115, 240 135, 335 135" />
-            </circle>
-            <circle r="2.5" fill="#f43f5e" filter="url(#subtle-glow)">
-              <animateMotion dur="4.2s" repeatCount="indefinite" path="M 365 135 C 455 135, 485 180, 580 185" />
-            </circle>
-            <circle r="2.5" fill="#f43f5e" filter="url(#subtle-glow)">
-              <animateMotion dur="3.8s" repeatCount="indefinite" path="M 615 185 C 690 185, 730 215, 805 215" />
-            </circle>
-            <circle r="2.2" fill="#a855f7">
-              <animateMotion dur="6s" repeatCount="indefinite" path="M 130 275 C 215 275, 260 260, 355 255" />
-            </circle>
-          </g>
-
-          {/* 3. Schematic Nodes */}
-          <g className="flow-nodes">
-            <g className="flow-node">
-              <circle cx="120" cy="115" r="7" fill="#0f1c3d" stroke="#22d3ee" strokeWidth="2.2" />
-              <text x="120" y="96" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Inflow Source A
-              </text>
-            </g>
-            <g className="flow-node">
-              <circle cx="120" cy="195" r="7" fill="#0f1c3d" stroke="#22d3ee" strokeWidth="2.2" />
-              <text x="120" y="176" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Inflow Source B
-              </text>
-            </g>
-            <g className="flow-node">
-              <circle cx="120" cy="275" r="7" fill="#0f1c3d" stroke="#22d3ee" strokeWidth="2.2" />
-              <text x="120" y="256" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Exchange Deposit
-              </text>
-            </g>
-
-            <g className="flow-node">
-              <circle cx="350" cy="135" r="8" fill="#181335" stroke="#a855f7" strokeWidth="2.2" />
-              <text x="350" y="115" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Hop 1 Relay
-              </text>
-            </g>
-            <g className="flow-node">
-              <circle cx="370" cy="255" r="8" fill="#181335" stroke="#a855f7" strokeWidth="2.2" />
-              <text x="370" y="235" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Consolidation Relay
-              </text>
-            </g>
-
-            {/* Target Flagged Hub */}
-            <g className="flow-node-target">
-              <circle cx="598" cy="185" r="16" fill="none" stroke="rgba(244,63,94,0.4)" strokeWidth="1.4" strokeDasharray="4 3" />
-              <circle cx="598" cy="185" r="9.5" fill="#310f1c" stroke="#f43f5e" strokeWidth="2.8" filter="url(#subtle-glow)" />
-              <text x="598" y="156" textAnchor="middle" fill="#fca5a5" fontWeight="700" fontSize="13" fontFamily="var(--font-mono, monospace)">
-                {targetLabel}
-              </text>
-              <text x="598" y="218" textAnchor="middle" fill="#fcd34d" fontWeight="600" fontSize="11" fontFamily="var(--font-mono, monospace)">
-                EVIDENTIARY SINK
-              </text>
-            </g>
-
-            <g className="flow-node">
-              <circle cx="615" cy="285" r="7" fill="#181335" stroke="#a855f7" strokeWidth="2" />
-              <text x="615" y="308" textAnchor="middle" fill="#cbd5e1" fontSize="11.5" fontFamily="var(--font-mono, monospace)">
-                Hop 2 Relay
-              </text>
-            </g>
-
-            <g className="flow-node">
-              <circle cx="815" cy="115" r="7.5" fill="#0f1c3d" stroke="#22d3ee" strokeWidth="2.2" />
-              <text x="815" y="96" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Licit Settlement
-              </text>
-            </g>
-            <g className="flow-node">
-              <circle cx="815" cy="215" r="8" fill="#310f1c" stroke="#f43f5e" strokeWidth="2.5" />
-              <text x="815" y="196" textAnchor="middle" fill="#fca5a5" fontSize="12" fontWeight="600" fontFamily="var(--font-mono, monospace)">
-                Flagged Sink
-              </text>
-            </g>
-            <g className="flow-node">
-              <circle cx="815" cy="295" r="6.5" fill="#131c31" stroke="#94a3b8" strokeWidth="2" />
-              <text x="815" y="318" textAnchor="middle" fill="#94a3b8" fontSize="11.5" fontFamily="var(--font-mono, monospace)">
-                Unclassified
-              </text>
-            </g>
-          </g>
-        </svg>
+      <div className="graph-summary-grid">
+        <div><span>Directed edges</span><strong>{formatInt(overviewData?.relationships)}</strong></div>
+        <div><span>Weak components</span><strong>{formatInt(pick(topology, ['weak_components']))}</strong></div>
+        <div><span>Louvain communities</span><strong>{formatInt(pick(topology, ['louvain_communities']))}</strong></div>
+        <div><span>Modularity</span><strong>{num(topology, ['louvain_modularity'], 4)}</strong></div>
       </div>
-
-      <div className="flow-legend">
-        <div className="legend-items">
-          <span><i style={{ background: cyan }} /> Inflow Source</span>
-          <span><i style={{ background: violet }} /> Aggregation Relay</span>
-          <span><i style={{ background: coral }} /> Flagged Entity Hub</span>
-          <span><i style={{ background: 'rgba(148, 163, 184, 0.6)' }} /> Directed Flow Path</span>
-          <span><i style={{ background: coral, borderStyle: 'dashed' }} /> Suspicious Corridor</span>
-        </div>
-        <div className="legend-meta">
-          <span>ILLUSTRATIVE TOPOLOGY SCHEMATIC · DYNAMIC DATA RESOLVED VIA API</span>
-        </div>
-      </div>
+      <p>These are full-graph descriptive statistics. They are not historical, as-of-timestep features and do not identify wallet owners.</p>
     </div>
   )
 }
 
+function TransactionNeighborhood({ data }: { data?: ApiRecord | ApiRecord[] }) {
+  const response = (Array.isArray(data) ? undefined : data) as ApiRecord | undefined
+  const allNodes = Array.isArray(response?.nodes) ? response.nodes as ApiRecord[] : []
+  const edges = Array.isArray(response?.edges) ? response.edges as ApiRecord[] : []
+  const nodes = allNodes.slice(0, 31)
+  if (!nodes.length) return <Empty message="No transaction neighborhood is available from the graph endpoint." />
+
+  const centerNode = response?.center_node as ApiRecord | undefined
+  const centerId = String(response?.query_txId ?? centerNode?.id ?? '')
+  const centerIndex = nodes.findIndex((node) => String(node.id ?? node.txId) === centerId)
+  const center = centerIndex < 0 ? 0 : centerIndex
+  const positions = nodes.map((node, index) => index === center
+    ? { x: 360, y: 190 }
+    : (() => {
+        const neighborIndex = index < center ? index : index - 1
+        const totalNeighbors = Math.max(nodes.length - 1, 1)
+        const angle = (neighborIndex / totalNeighbors) * Math.PI * 2 - Math.PI / 2
+        return { x: 360 + Math.cos(angle) * 260, y: 190 + Math.sin(angle) * 135 }
+      })())
+  const shownIds = new Set(nodes.map((node) => String(node.id ?? node.txId)))
+  const visibleEdges = edges.filter((edge) => shownIds.has(String(edge.source)) && shownIds.has(String(edge.target)))
+  const indexById = new Map(nodes.map((node, index) => [String(node.id ?? node.txId), index]))
+
+  return <div className="actual-network-view">
+    <div className="network-scope-line">Observed transaction edges · showing {nodes.length} of {allNodes.length} nodes · {visibleEdges.length} displayed directed edges</div>
+    <svg viewBox="0 0 720 380" role="img" aria-label={`Observed transaction neighborhood for ${centerId}`}>
+      {visibleEdges.map((edge, index) => {
+        const sourceIndex = indexById.get(String(edge.source))
+        const targetIndex = indexById.get(String(edge.target))
+        if (sourceIndex === undefined || targetIndex === undefined) return null
+        const source = positions[sourceIndex]
+        const target = positions[targetIndex]
+        return <line key={`${edge.source}-${edge.target}-${index}`} x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke="#a8a18e" strokeWidth="1.4" markerEnd="url(#actual-edge-arrow)" />
+      })}
+      <defs><marker id="actual-edge-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8c8778" /></marker></defs>
+      {nodes.map((node, index) => {
+        const id = String(node.id ?? node.txId)
+        const risk = numberValue(node, ['calibrated_risk'])
+        const fill = index === center ? '#596b45' : risk === null ? '#9a978d' : risk >= 0.5 ? '#a95543' : risk >= 0.2 ? '#b58b32' : '#71834f'
+        const pos = positions[index]
+        return <g key={id}>
+          <title>{`Transaction ${id}; ${String(node.relation || 'neighbor')}; timestep ${node.timestep ?? 'unavailable'}; calibrated risk ${risk === null ? 'unavailable' : risk}`}</title>
+          <circle cx={pos.x} cy={pos.y} r={index === center ? 13 : 8} fill={fill} stroke="#fffefa" strokeWidth="2" />
+          <text x={pos.x} y={pos.y + 22} textAnchor="middle">{id.slice(-8)}</text>
+        </g>
+      })}
+    </svg>
+    <p>Node color reflects the available calibrated risk score only. Graph membership and layout use the stored directed edge list; missing risk values are gray.</p>
+  </div>
+}
 /* =========================================================================
    Distinctive Asymmetric Hero Section (100% Dynamic Metadata, Zero Hardcoding)
    ========================================================================= */
 function Hero({
   overviewData,
-  topEntityId,
 }: {
   overviewData?: ApiRecord
-  topEntityId?: string
 }) {
   const datasetOverview = (overviewData?.dataset_overview as ApiRecord) || undefined
   const topology = (overviewData?.graph_topology as ApiRecord) || undefined
@@ -381,7 +247,7 @@ function Hero({
       </div>
 
       <div className="hero-col-right">
-        <FlowField topEntityId={topEntityId} />
+      <GraphSummaryPanel overviewData={overviewData} />
       </div>
     </section>
   )
@@ -410,8 +276,6 @@ function Overview({
   const row = overviewData
   const datasetOverview = (row?.dataset_overview as ApiRecord) || undefined
   const suspiciousRecords = records(suspiciousData)
-  const topSuspicious = suspiciousRecords[0]
-  const topEntityId = topSuspicious ? String(pick(topSuspicious, ['id', 'transaction_id', 'txId'])) : undefined
 
   // Derive Champion Model dynamically from /api/models
   const modelList = Array.isArray((modelsData as any)?.models)
@@ -434,7 +298,7 @@ function Overview({
 
   return (
     <div className="view-overview">
-      <Hero overviewData={row} topEntityId={topEntityId} />
+      <Hero overviewData={row} />
 
       {loading ? (
         <Loading />
@@ -748,6 +612,98 @@ function ModelLab({
   )
 }
 
+function EvaluationMetrics({ data, loading, error, retry }: {
+  data?: ApiRecord
+  loading: boolean
+  error?: Error
+  retry: () => void
+}) {
+  const groups = (data?.groups || {}) as Record<string, Array<ApiRecord>>
+  const models = Array.isArray(data?.models) ? data.models as ApiRecord[] : []
+  const headings: Record<string, string> = { regression: 'Regression metrics', classification: 'Classification metrics' }
+  return (
+    <div className="studio-view">
+      <div className="view-masthead">
+        <Label>Evaluation Results / 06</Label>
+        <h1>Metrics from saved results</h1>
+        <p>Values are read from the evaluation module’s CSV exports for the held-out labeled test set. Undefined and unavailable values remain explicit.</p>
+      </div>
+      {loading ? <Loading /> : error ? <ErrorState error={error} retry={retry} /> : data?.status !== 'available' ? <Empty message={String(data?.reason || 'Evaluation results are unavailable. Run the evaluation module to create its CSV exports.')} /> : (
+        <div className="evaluation-sections">
+          {(['classification', 'regression'] as const).map((task) => {
+            const rows = groups[task] || []
+            return <Card key={task} className="evaluation-card">
+              <SectionHead eyebrow="Saved CSV results" title={headings[task]} meta={`${rows.length} metrics`} />
+              {!rows.length ? <Empty message={`No ${task} metric rows are available.`} /> : <div className="table-wrap evaluation-table-wrap"><table className="dense-table evaluation-table">
+                <thead><tr><th>Metric</th>{models.map((model) => <th key={String(model.id)}>{String(model.name)}</th>)}</tr></thead>
+                <tbody>{rows.map((row) => {
+                  const results = (row.results || {}) as Record<string, ApiRecord>
+                  const first = Object.values(results)[0]
+                  const label = String(first?.label || row.metric)
+                  return <tr key={String(row.metric)}><td className="metric-name-cell">{label}</td>{models.map((model) => {
+                    const result = results[String(model.id)]
+                    const status = String(result?.status || 'unavailable')
+                    const shown = status === 'calculated' && typeof result?.value === 'number' ? result.value.toFixed(4) : status
+                    return <td key={String(model.id)}><span className={`evaluation-value status-${status}`}>{shown}</span></td>
+                  })}</tr>
+                })}</tbody>
+              </table></div>}
+            </Card>
+          })}
+          <p className="evaluation-source">Source: <code>{String(data?.source || 'evaluation_metrics/results/*.csv')}</code>. These probability-versus-label regression measures are descriptive; they are not separate continuous-target tasks.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GraphGallery({ data, loading, error, retry }: {
+  data?: ApiRecord
+  loading: boolean
+  error?: Error
+  retry: () => void
+}) {
+  const graphRows = Array.isArray(data?.graphs) ? data.graphs as ApiRecord[] : []
+  const skippedGraphs = Array.isArray(data?.skipped_graphs) ? data.skipped_graphs as ApiRecord[] : []
+  const groups = ['regression', 'classification']
+  return <div className="studio-view">
+    <div className="view-masthead">
+      <Label>Generated Figures / 07</Label>
+      <h1>Metric graph gallery</h1>
+      <p>Rendered PNG figures from the Python visualization scripts. Missing figures are omitted and reported by the generation manifest.</p>
+    </div>
+    {loading ? <Loading /> : error ? <ErrorState error={error} retry={retry} /> : !graphRows.length ? <Empty message={String(data?.reason || 'No generated metric graphs are available. Run the documented graph generator after evaluation results exist.')} /> : groups.map((task) => {
+      const rows = graphRows.filter((item) => item.task === task)
+      if (!rows.length) return null
+      return <section className="gallery-group" key={task}>
+        <SectionHead eyebrow="Python-generated PNG" title={`${task[0].toUpperCase()}${task.slice(1)} visualizations`} meta={`${rows.length} figures`} />
+        <div className="metric-gallery-grid">{rows.map((item) => {
+          const metric = String(item.metric)
+          const title = metric.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+          return <Card className="metric-figure-card" key={`${task}-${metric}`}>
+            <h3>{title}</h3>
+            <p>Compared across saved model results · {Number(item.dpi) || 320} DPI</p>
+            <a href={String(item.url)} target="_blank" rel="noreferrer" aria-label={`Open ${title} graph in a new tab`}>
+              <img
+                src={String(item.url)}
+                alt={`${title} comparison chart for available models`}
+                loading="lazy"
+                onError={(event) => {
+                  const link = event.currentTarget.parentElement
+                  if (link) link.textContent = 'This generated figure is currently unavailable.'
+                }}
+              />
+            </a>
+          </Card>
+        })}</div>
+      </section>
+    })}
+    {skippedGraphs.map((item) => <p className="evaluation-source" key={`skipped-${String(item.metric)}`}>
+      {String(item.metric).toUpperCase()} graph skipped: {String(item.reason || 'No calculated result was available.')}
+    </p>)}
+  </div>
+}
+
 /* =========================================================================
    View 04: Network Explorer (Dedicated Dynamic Ego-Network Inspector)
    ========================================================================= */
@@ -763,9 +719,6 @@ function NetworkPage({
   retry: () => void
 }) {
   const rows = records(data)
-  const centerNode = (data as any)?.center_node
-  const centerTxId = centerNode ? String(centerNode.id || centerNode.txId) : undefined
-
   return (
     <div className="immersive-view">
       <div className="view-masthead">
@@ -785,7 +738,7 @@ function NetworkPage({
             title="Structural Adjacency &amp; Directional Flow"
             meta={rows.length ? `${rows.length} BACKEND NODES RESOLVED` : 'IDLE'}
           />
-          <FlowField topEntityId={centerTxId} />
+          <TransactionNeighborhood data={data} />
         </Card>
       )}
     </div>
@@ -984,11 +937,29 @@ export default function IntelligenceDashboard() {
   const [page, setPage] = useState<ViewId>('overview')
   const [query, setQuery] = useState('')
 
+  useEffect(() => {
+    const syncRoute = () => {
+      const candidate = window.location.hash.slice(1) as ViewId
+      setPage(nav.some((item) => item.id === candidate) ? candidate : 'overview')
+    }
+    syncRoute()
+    window.addEventListener('hashchange', syncRoute)
+    return () => window.removeEventListener('hashchange', syncRoute)
+  }, [])
+
+  const navigate = (view: ViewId) => {
+    const nextHash = view === 'overview' ? '' : `#${view}`
+    if (window.location.hash !== nextHash) window.location.hash = nextHash
+    setPage(view)
+  }
+
   const overview = useSWR('/api/overview', (path) => fetchBackend<ApiRecord>(path))
   const suspicious = useSWR('/api/suspicious', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
   const models = useSWR('/api/models', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
   const network = useSWR('/api/network', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
   const score = useSWR('/api/score', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
+  const evaluation = useSWR('/api/evaluation', (path) => fetchBackend<ApiRecord>(path))
+  const graphs = useSWR('/api/graphs', (path) => fetchBackend<ApiRecord>(path))
 
   const isConnected = Boolean(overview.data || models.data || suspicious.data)
 
@@ -1002,7 +973,7 @@ export default function IntelligenceDashboard() {
     [suspicious.data, query]
   )
 
-  const retry = () => [overview, suspicious, models, network, score].forEach((feed: Feed) => feed.mutate())
+  const retry = () => [overview, suspicious, models, network, score, evaluation, graphs].forEach((feed: Feed) => feed.mutate())
 
   return (
     <div className="command-shell">
@@ -1025,7 +996,7 @@ export default function IntelligenceDashboard() {
         <div className="top-command-controls">
           <div className="brand-meta">
             <span className="live-dot" style={{ background: isConnected ? cyan : amber }} />
-            <span>{isConnected ? 'BACKEND CONNECTED · DUAL-STACK API' : 'CONNECTING TO BACKEND...'}</span>
+            <span>{isConnected ? 'BACKEND CONNECTED · LOCAL API' : 'CONNECTING TO BACKEND...'}</span>
           </div>
 
           <button className="sync-btn" onClick={retry}>
@@ -1053,7 +1024,7 @@ export default function IntelligenceDashboard() {
                 loading={overview.isLoading || models.isLoading}
                 error={overview.error}
                 retry={retry}
-                onNavigate={setPage}
+                onNavigate={navigate}
               />
             )}
             {page === 'explorer' && (
@@ -1081,6 +1052,8 @@ export default function IntelligenceDashboard() {
                 retry={retry}
               />
             )}
+            {page === 'metrics' && <EvaluationMetrics data={evaluation.data} loading={evaluation.isLoading} error={evaluation.error} retry={retry} />}
+            {page === 'graphs' && <GraphGallery data={graphs.data} loading={graphs.isLoading} error={graphs.error} retry={retry} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -1091,7 +1064,7 @@ export default function IntelligenceDashboard() {
           <button
             key={id}
             className={`dock-btn ${page === id ? 'active' : ''}`}
-            onClick={() => setPage(id)}
+            onClick={() => navigate(id)}
             aria-label={label}
             aria-current={page === id ? 'page' : undefined}
           >

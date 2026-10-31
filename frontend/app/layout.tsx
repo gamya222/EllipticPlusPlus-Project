@@ -4,6 +4,7 @@ import './globals.css'
 import './command-center.css'
 import './dock-fix.css'
 import './globe-enhancements.css'
+import './research-theme.css'
 
 export const metadata: Metadata = {
   title: 'Elliptic++ | Financial Crime Intelligence',
@@ -29,8 +30,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'dark',
-  themeColor: '#080B14',
+  colorScheme: 'light',
+  themeColor: '#F7F3E8',
 }
 
 export default function RootLayout({

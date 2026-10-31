@@ -33,7 +33,7 @@
   opacity: 0.5;
   background:
     radial-gradient(circle at 10% 20%, rgba(34, 211, 238, 0.12), transparent 45%),
-    radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.12), transparent 45%);
+    radial-gradient(circle at 90% 80%, rgba(198, 155, 69, 0.12), transparent 45%);
   pointer-events: none;
   border-radius: 24px;
 }

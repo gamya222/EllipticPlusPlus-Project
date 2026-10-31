@@ -8,7 +8,7 @@
   --line: rgba(120, 170, 245, 0.22);
   --cyan: #22d3ee;
   --cyan-bright: #00f2fe;
-  --violet: #a855f7;
+  --violet: #b58b32;
   --coral: #f43f5e;
   --amber: #fbbf24;
   --emerald: #34d399;
@@ -30,7 +30,7 @@ html, body {
   min-width: 320px;
   background: 
     radial-gradient(1400px circle at 50% -10%, rgba(37, 99, 235, 0.22), transparent 70%),
-    radial-gradient(900px circle at 85% 15%, rgba(139, 92, 246, 0.16), transparent 60%),
+    radial-gradient(900px circle at 85% 15%, rgba(198, 155, 69, 0.12), transparent 60%),
     radial-gradient(1000px circle at 15% 85%, rgba(6, 182, 212, 0.14), transparent 60%),
     linear-gradient(180deg, #070d1e 0%, #0a142c 50%, #050a16 100%);
   background-attachment: fixed;

@@ -57,7 +57,7 @@
 .dock-btn.active {
   color: #ffffff !important;
   border-color: rgba(34, 211, 238, 0.55) !important;
-  background: linear-gradient(135deg, rgba(34, 211, 238, 0.24), rgba(168, 85, 247, 0.2)) !important;
+  background: linear-gradient(135deg, rgba(89, 107, 69, 0.24), rgba(198, 155, 69, 0.2)) !important;
   box-shadow: 0 0 20px rgba(34, 211, 238, 0.22) !important;
 }
 

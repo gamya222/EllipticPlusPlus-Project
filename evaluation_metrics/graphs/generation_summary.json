@@ -1,0 +1,546 @@
+{
+  "schema_version": "elliptic-metric-graphs-v1",
+  "provenance": "Only calculated finite values from evaluation_metrics/results CSV exports are plotted.",
+  "graph_directory": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs",
+  "requested_graph_count": 18,
+  "generated_count": 17,
+  "skipped_count": 1,
+  "failed_count": 0,
+  "graphs": [
+    {
+      "metric": "rmse",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/rmse_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.35394361737830593,
+        "GraphSAGE": 0.2792395734126475,
+        "GRU": 0.28080287086834677,
+        "Logistic Regression": 0.36322222439844454,
+        "Calibrated Risk Scorer": 0.22975809570521546
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "mse",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/mse_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.12527608428284062,
+        "GraphSAGE": 0.07797473935967734,
+        "GRU": 0.07885025228790542,
+        "Logistic Regression": 0.131930384296954,
+        "Calibrated Risk Scorer": 0.05278878254208695
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "mae",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/mae_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.3128657043196928,
+        "GraphSAGE": 0.18478426716823268,
+        "GRU": 0.16087901322364623,
+        "Logistic Regression": 0.27469606761032006,
+        "Calibrated Risk Scorer": 0.09326419768903581
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "mape",
+      "task": "regression",
+      "status": "skipped",
+      "reason": "SKIPPED mape: GCN: MAPE is undefined when any y_true value is zero; GraphSAGE: MAPE is undefined when any y_true value is zero; GRU: MAPE is undefined when any y_true value is zero; Logistic Regression: MAPE is undefined when any y_true value is zero; Calibrated Risk Scorer: MAPE is undefined when any y_true value is zero",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "existing_png_retained": false
+    },
+    {
+      "metric": "r2",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/r2_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": -1.0622835516128641,
+        "GraphSAGE": -0.2836130961732879,
+        "GRU": -0.29802571069141637,
+        "Logistic Regression": -1.1718260356804553,
+        "Calibrated Risk Scorer": 0.1309958435448495
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "nrmse",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/nrmse_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.35394361737830593,
+        "GraphSAGE": 0.2792395734126475,
+        "GRU": 0.28080287086834677,
+        "Logistic Regression": 0.36322222439844454,
+        "Calibrated Risk Scorer": 0.22975809570521546
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "medae",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/medae_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.3553006947040558,
+        "GraphSAGE": 0.09155771136283875,
+        "GRU": 0.0483557004481554,
+        "Logistic Regression": 0.2531265914440155,
+        "Calibrated Risk Scorer": 0.010010829082731236
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "bias",
+      "task": "regression",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/regression/bias_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/regression_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.24567050245206346,
+        "GraphSAGE": 0.11891655651956692,
+        "GRU": 0.13432589884941487,
+        "Logistic Regression": 0.2286544380006229,
+        "Calibrated Risk Scorer": 0.058872748002296256
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "accuracy",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/accuracy_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.9092981403719256,
+        "GraphSAGE": 0.8943611277744451,
+        "GRU": 0.8946010797840432,
+        "Logistic Regression": 0.7992201559688062,
+        "Calibrated Risk Scorer": 0.9349730053989203
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "precision",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/precision_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.36618839675608233,
+        "GraphSAGE": 0.31655844155844154,
+        "GRU": 0.35548885077186965,
+        "Logistic Regression": 0.21151885830784914,
+        "Calibrated Risk Scorer": 0.49968294229549776
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "recall",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/recall_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.5420129270544783,
+        "GraphSAGE": 0.5401662049861495,
+        "GRU": 0.765466297322253,
+        "Logistic Regression": 0.7663896583564174,
+        "Calibrated Risk Scorer": 0.7276084949215144
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "f1_score",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/f1_score_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.4370811615785555,
+        "GraphSAGE": 0.3991811668372569,
+        "GRU": 0.4855051244509517,
+        "Logistic Regression": 0.3315358498102656,
+        "Calibrated Risk Scorer": 0.5924812030075188
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "specificity",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/specificity_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.9348174761018798,
+        "GraphSAGE": 0.9189709373195611,
+        "GRU": 0.903573490729454,
+        "Logistic Regression": 0.8015012510425354,
+        "Calibrated Risk Scorer": 0.9493808943350228
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "auc_roc",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/auc_roc_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.8314609903214442,
+        "GraphSAGE": 0.8694244161727452,
+        "GRU": 0.9328196645155145,
+        "Logistic Regression": 0.8677294944925634,
+        "Calibrated Risk Scorer": 0.9212896771411601
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "log_loss",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/log_loss_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.4047687114968819,
+        "GraphSAGE": 0.25507338600541984,
+        "GRU": 0.2679535307669714,
+        "Logistic Regression": 0.3929038920383796,
+        "Calibrated Risk Scorer": 0.1985698947380657
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "mcc",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/mcc_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.39863853611442,
+        "GraphSAGE": 0.3604404597179698,
+        "GRU": 0.47537778324965435,
+        "Logistic Regression": 0.32992023754064914,
+        "Calibrated Risk Scorer": 0.5701297783861566
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "cohens_kappa",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/cohens_kappa_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.3897605148539143,
+        "GraphSAGE": 0.3455677220693435,
+        "GRU": 0.4354102009644445,
+        "Logistic Regression": 0.25574903278503863,
+        "Calibrated Risk Scorer": 0.5584690553666342
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    },
+    {
+      "metric": "balanced_accuracy",
+      "task": "classification",
+      "status": "generated",
+      "path": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/graphs/classification/balanced_accuracy_comparison.png",
+      "source": "/mnt/d/BDE_Project/EllipticPlusPlus-Project/evaluation_metrics/results/classification_results.csv",
+      "dpi": 320,
+      "plotted_models": [
+        "GCN",
+        "GraphSAGE",
+        "GRU",
+        "Logistic Regression",
+        "Calibrated Risk Scorer"
+      ],
+      "plotted_values": {
+        "GCN": 0.7384152015781791,
+        "GraphSAGE": 0.7295685711528553,
+        "GRU": 0.8345198940258536,
+        "Logistic Regression": 0.7839454546994764,
+        "Calibrated Risk Scorer": 0.8384946946282685
+      },
+      "sample_counts": {
+        "GCN": 16670,
+        "GraphSAGE": 16670,
+        "GRU": 16670,
+        "Logistic Regression": 16670,
+        "Calibrated Risk Scorer": 16670
+      },
+      "excluded": {},
+      "warnings": "findfont: Failed to find font weight semibold for DejaVu Sans, now using 700."
+    }
+  ]
+}

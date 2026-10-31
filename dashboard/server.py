@@ -24,6 +24,22 @@ DASHBOARD_DIR = PROJECT_ROOT / "dashboard"
 PREPROCESSING_DIR = PROJECT_ROOT / "preprocessing"
 MODELS_DIR = PROJECT_ROOT / "models"
 DATA_DIR = PROJECT_ROOT / "data"
+EVALUATION_DIR = PROJECT_ROOT / "evaluation_metrics"
+EVALUATION_RESULTS_DIR = EVALUATION_DIR / "results"
+METRIC_GRAPHS_DIR = EVALUATION_DIR / "graphs"
+MODEL_DISPLAY_NAMES = {
+    "gcn": "GCN",
+    "graphsage": "GraphSAGE",
+    "gru": "GRU",
+    "logistic": "Logistic Regression",
+    "risk_scorer": "Calibrated Risk Scorer",
+}
+
+# When launched as `python dashboard/server.py`, Python places `dashboard/`
+# rather than the repository root first on sys.path. Make the sibling `models`
+# package importable for native inference in that documented launch mode.
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 # Check if EllipticInference can be imported directly
 HAS_NATIVE_INFERENCE = False
@@ -199,6 +215,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             fig_path = PREPROCESSING_DIR / "figures" / fig_name
             self._send_file(fig_path, "image/svg+xml; charset=utf-8")
             return
+        elif path.startswith("/api/metric-graphs/"):
+            self._handle_metric_graph(path.removeprefix("/api/metric-graphs/"))
+            return
 
         # 2. API Endpoints
         if path == "/api/overview":
@@ -211,6 +230,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._handle_api_network(params)
         elif path == "/api/score":
             self._handle_api_score_get(params)
+        elif path == "/api/evaluation":
+            self._handle_api_evaluation()
+        elif path == "/api/graphs":
+            self._handle_api_graphs()
         else:
             self.send_error(HTTPStatus.NOT_FOUND, f"Unknown endpoint: {path}")
 
@@ -224,6 +247,143 @@ class DashboardHandler(BaseHTTPRequestHandler):
     # -------------------------------------------------------------
     # API Implementation
     # -------------------------------------------------------------
+    def _handle_api_evaluation(self):
+        """Return the saved evaluation CSV values without recomputing metrics."""
+        metric_rows = {}
+        for task in ("regression", "classification"):
+            csv_path = EVALUATION_RESULTS_DIR / f"{task}_results.csv"
+            if not csv_path.is_file():
+                self._send_json({
+                    "status": "unavailable",
+                    "reason": f"Saved {task} evaluation results are missing.",
+                    "groups": {"regression": [], "classification": []},
+                    "models": [{"id": key, "name": value} for key, value in MODEL_DISPLAY_NAMES.items()],
+                })
+                return
+            try:
+                with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+                    for row in csv.DictReader(handle):
+                        model = row.get("model", "").strip().lower()
+                        metric = row.get("metric", "").strip().lower()
+                        status = row.get("status", "unavailable").strip().lower()
+                        if model not in MODEL_DISPLAY_NAMES or not metric:
+                            continue
+                        value = None
+                        if status == "calculated":
+                            try:
+                                candidate = float(row.get("value", ""))
+                                if candidate == candidate and abs(candidate) != float("inf"):
+                                    value = candidate
+                                else:
+                                    status = "error"
+                            except (TypeError, ValueError):
+                                status = "error"
+                        count = row.get("sample_count", "")
+                        try:
+                            sample_count = int(count) if count else None
+                        except ValueError:
+                            sample_count = None
+                        metric_rows.setdefault(row.get("task", task), {}).setdefault(metric, {})[model] = {
+                            "value": value,
+                            "status": status or "unavailable",
+                            "label": row.get("abbreviation") or metric,
+                            "explanation": row.get("explanation") or None,
+                            "sample_count": sample_count,
+                        }
+            except (OSError, csv.Error, UnicodeError) as exc:
+                self._send_json({
+                    "status": "error",
+                    "reason": f"Could not read saved {task} results: {exc}",
+                    "groups": {"regression": [], "classification": []},
+                    "models": [{"id": key, "name": value} for key, value in MODEL_DISPLAY_NAMES.items()],
+                }, status=503)
+                return
+
+        groups = {}
+        for task in ("regression", "classification"):
+            groups[task] = [
+                {"metric": metric, "results": values}
+                for metric, values in metric_rows.get(task, {}).items()
+            ]
+        self._send_json({
+            "schema_version": "elliptic-evaluation-api-v1",
+            "status": "available" if any(groups.values()) else "unavailable",
+            "source": "evaluation_metrics/results/{regression,classification}_results.csv",
+            "models": [{"id": key, "name": value} for key, value in MODEL_DISPLAY_NAMES.items()],
+            "groups": groups,
+        })
+
+    def _handle_api_graphs(self):
+        """List only generated graph PNGs recorded by the Python graph generator."""
+        summary_path = METRIC_GRAPHS_DIR / "generation_summary.json"
+        if not summary_path.is_file():
+            self._send_json({"status": "unavailable", "reason": "Graph generation summary is missing.", "graphs": []})
+            return
+        try:
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+            graphs = []
+            skipped_graphs = []
+            for item in summary.get("graphs", []):
+                if item.get("status") == "skipped":
+                    skipped_graphs.append({
+                        "metric": item.get("metric"),
+                        "task": item.get("task"),
+                        "reason": item.get("reason"),
+                    })
+                if item.get("status") != "generated":
+                    continue
+                task, metric = item.get("task"), item.get("metric")
+                if task not in ("regression", "classification") or not isinstance(metric, str):
+                    continue
+                filename = f"{metric}_comparison.png"
+                local_file = (METRIC_GRAPHS_DIR / task / filename).resolve()
+                if local_file.parent != (METRIC_GRAPHS_DIR / task).resolve() or not local_file.is_file():
+                    continue
+                graphs.append({
+                    "metric": metric,
+                    "task": task,
+                    "status": "generated",
+                    "url": f"/api/metric-graphs/{task}/{filename}",
+                    "dpi": item.get("dpi"),
+                    "models": item.get("plotted_models", []),
+                })
+            self._send_json({
+                "schema_version": summary.get("schema_version", "elliptic-metric-graphs-v1"),
+                "status": "available" if graphs else "unavailable",
+                "generated_count": len(graphs),
+                "skipped_count": summary.get("skipped_count", 0),
+                "skipped_graphs": skipped_graphs,
+                "graphs": graphs,
+            })
+        except (OSError, ValueError, TypeError) as exc:
+            self._send_json({"status": "error", "reason": f"Could not read graph summary: {exc}", "graphs": []}, status=503)
+
+    def _handle_metric_graph(self, relative_path: str):
+        """Serve a generated PNG only when it is listed as generated in the manifest."""
+        parts = relative_path.split("/")
+        if len(parts) != 2 or parts[0] not in ("regression", "classification"):
+            self.send_error(HTTPStatus.NOT_FOUND, "Unknown metric graph")
+            return
+        task, filename = parts
+        if not filename.endswith("_comparison.png") or not filename[:-15].replace("_", "").isalnum():
+            self.send_error(HTTPStatus.NOT_FOUND, "Unknown metric graph")
+            return
+        metric = filename[:-15]
+        summary_path = METRIC_GRAPHS_DIR / "generation_summary.json"
+        try:
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+            listed = any(
+                row.get("status") == "generated" and row.get("task") == task and row.get("metric") == metric
+                for row in summary.get("graphs", [])
+            )
+        except (OSError, ValueError, TypeError):
+            listed = False
+        graph_path = (METRIC_GRAPHS_DIR / task / filename).resolve()
+        if not listed or graph_path.parent != (METRIC_GRAPHS_DIR / task).resolve():
+            self.send_error(HTTPStatus.NOT_FOUND, "Metric graph is unavailable")
+            return
+        self._send_file(graph_path, "image/png")
+
     def _handle_api_overview(self):
         """Returns AML KPI summary from real graph analytics & split statistics."""
         STORE.load_data()
@@ -241,7 +401,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             tx_id_int = int(r["txId"])
             c_risk = round(float(r["calibrated_illicit_risk"]), 4)
             pred_info = STORE.model_predictions_by_id.get(tx_id_int, {})
-            gcn_prob = pred_info.get("gcn", {}).get("score", c_risk)
+            gcn_prob = pred_info.get("gcn", {}).get("score")
             top_evidence.append({
                 "id": str(tx_id_int),
                 "transaction_id": tx_id_int,
@@ -249,8 +409,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "label": "High Risk" if c_risk >= 0.5 else "Elevated",
                 "risk": c_risk,
                 "calibrated_risk": c_risk,
-                "probability": round(float(gcn_prob), 4),
-                "model": "GCN / Multi-Model",
+                "probability": round(float(gcn_prob), 4) if gcn_prob is not None else None,
+                "model": "GCN + Calibrated Risk" if gcn_prob is not None else "Calibrated GRU Risk Scorer",
                 "total_transactions": 203769,
                 "transactions": 203769,
                 "relationships": 234355,
@@ -342,7 +502,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             tx_id_int = int(r["txId"])
             c_risk = round(float(r["calibrated_illicit_risk"]), 4)
             pred_info = STORE.model_predictions_by_id.get(tx_id_int, {})
-            gcn_prob = pred_info.get("gcn", {}).get("score", c_risk)
+            gcn_prob = pred_info.get("gcn", {}).get("score")
             clean_records.append({
                 "rank": int(r["rank"]),
                 "txId": tx_id_int,
@@ -351,8 +511,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "timestep": int(r["Time step"]),
                 "calibrated_illicit_risk": c_risk,
                 "calibrated_risk": c_risk,
-                "probability": round(float(gcn_prob), 4),
-                "model": "GCN",
+                "probability": round(float(gcn_prob), 4) if gcn_prob is not None else None,
+                "model": "GCN" if gcn_prob is not None else None,
                 "status": "High Risk" if c_risk >= 0.5 else ("Elevated" if c_risk >= 0.2 else "Monitored"),
                 "label": "High Risk" if c_risk >= 0.5 else ("Elevated" if c_risk >= 0.2 else "Monitored"),
                 "in_degree": int(r["in_degree_asof"]),
@@ -595,6 +755,60 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "status": "fully_functional",
             },
         ]
+
+        # The values above document the API shape, but saved checkpoints and
+        # metrics are the source of truth for this checkout. Keep the dashboard
+        # aligned with the artifacts that are actually present locally.
+        artifact_ids = {"risk_scorer": "risk_predictor"}
+        for model_record in models_data:
+            artifact_id = artifact_ids.get(model_record["id"], model_record["id"])
+            artifact = STORE.model_metrics.get(artifact_id, {})
+            test = artifact.get("test", {})
+            matrix = test.get("confusion_matrix_licit_illicit")
+            if not test or not matrix or len(matrix) != 2:
+                continue
+
+            metrics = {
+                "precision": round(float(test["illicit_precision"]), 4),
+                "recall": round(float(test["illicit_recall"]), 4),
+                "f1": round(float(test["illicit_f1"]), 4),
+                "pr_auc": round(float(test["illicit_pr_auc"]), 4),
+                "accuracy": round(float(test["accuracy"]), 4),
+            }
+            tn, fp = map(int, matrix[0])
+            fn, tp = map(int, matrix[1])
+            confusion = {"tn": tn, "fp": fp, "fn": fn, "tp": tp}
+            confusion_rows = {
+                "matrix_format": "[[TN, FP], [FN, TP]]",
+                "licit_row": [tn, fp],
+                "illicit_row": [fn, tp],
+                **confusion,
+            }
+            model_record.update(metrics)
+            model_record["benchmark_pr_auc"] = metrics["pr_auc"]
+            model_record["ap_delta_pp"] = (
+                f"+{(metrics['pr_auc'] * 100 - test['support']['illicit'] / test['count'] * 100):.2f} pp"
+            )
+            model_record["confusion_matrix"] = confusion_rows
+            model_record["checkpoint_metrics"] = {
+                "source": f"models/{artifact_id}/artifacts/{artifact_id}_metrics.json",
+                "device": artifact.get("device"),
+                "epochs_selected": artifact.get("epochs_selected"),
+                **metrics,
+                "confusion_matrix": confusion,
+            }
+            model_record["benchmark_reference"] = {
+                "source": "models/comparison_report.md",
+                **metrics,
+                "confusion_matrix": confusion,
+            }
+            if artifact_id == "risk_predictor":
+                model_record["checkpoint_metrics"].update({
+                    "brier_score": artifact.get("test_brier_score"),
+                    "ece": artifact.get("test_expected_calibration_error_10_bins"),
+                    "threshold": artifact.get("threshold"),
+                })
+
         data = {
             "status": "fully_functional",
             "benchmark_protocol": {
@@ -606,15 +820,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "decision_threshold": 0.5,
             },
             "pr_auc_discrepancy_investigation": {
-                "status": "fully_diagnosed",
-                "summary": "Discrepancy stems from CPU multi-threading early stopping differences in PyTorch vs the historical GPU reference benchmark in comparison_report.md.",
-                "details": [
-                    "1. GCN: Checkpoint artifact on CPU selected epoch 1 (PR-AUC 0.4382, F1 0.4253), whereas historical GPU reference reached PR-AUC 0.4461 (F1 0.4371).",
-                    "2. GraphSAGE: Checkpoint artifact on CPU selected epoch 1 (PR-AUC 0.5091, F1 0.3936), whereas historical GPU reference reached PR-AUC 0.5055 (F1 0.3992).",
-                    "3. Temporal GRU: Checkpoint artifact on CPU selected epoch 1 (PR-AUC 0.5853, F1 0.4568), whereas historical GPU reference reached PR-AUC 0.7266 (F1 0.4855).",
-                    "4. Logistic Regression: Exactly matches to 4 decimal places across both artifact and report (PR-AUC 0.4739, F1 0.3315, CM [[12493, 3094], [253, 830]]) because it ran deterministically on CPU.",
-                    "5. Calibrated Risk Scorer: Platt calibration compresses probabilities below 0.5 cutoff on CPU checkpoint (giving 15,587 TN, 1,083 FN, Brier 0.0649, PR-AUC 0.5886), whereas comparison_report.md cites earlier GPU calibrated reference (PR-AUC 0.7022, F1 0.5925, CM [[14798, 789], [295, 788]])."
-                ]
+                "status": "served_from_local_artifacts",
+                "summary": "Model metrics are loaded from the saved JSON artifacts in this checkout; the endpoint does not assert a CPU/GPU discrepancy.",
+                "details": [],
             },
             "models": models_data,
             "records": models_data,
@@ -739,25 +947,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if scorer is not None:
                 try:
                     batch_res = scorer.score_batch([tx_id], model=model)
-                    rec = batch_res.get("records", [{}])[0]
+                    rec = batch_res[0] if batch_res else {}
                     rec["id"] = str(tx_id)
                     rec["transaction_id"] = tx_id
                     rec["model"] = model.upper()
-                    m_score = rec.get("model_output", {}).get("score", 0.0)
-                    r_score = rec.get("risk", {}).get("score", 0.0)
-                    rec["probability"] = round(float(m_score), 4)
-                    rec["calibrated_risk"] = round(float(r_score), 4)
-                    return {
-                        "status": "fully_functional",
+                    record_status = rec.get("status", "inference_unavailable")
+                    response = {
+                        "status": "fully_functional" if record_status == "scored" else record_status,
                         "execution_mode": "native_in_process",
-                        "probability": rec["probability"],
-                        "calibrated_risk": rec["calibrated_risk"],
                         "model": model.upper(),
                         "record": rec,
                         "records": [rec],
                         "items": [rec],
                         "data": [rec],
                     }
+                    if record_status == "scored":
+                        m_score = rec["model_output"]["score"]
+                        r_score = rec["risk"]["score"]
+                        rec["probability"] = round(float(m_score), 4)
+                        rec["calibrated_risk"] = round(float(r_score), 4)
+                        response["probability"] = rec["probability"]
+                        response["calibrated_risk"] = rec["calibrated_risk"]
+                    return response
                 except Exception as e:
                     print(f"[Inference Error] Native call failed: {e}")
 
@@ -829,6 +1040,30 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "data": [rec],
             }
 
+        # A known test transaction without a model runtime or verified score is unavailable,
+        # not unsupported; reserve the scope status for IDs not present in the test artifact.
+        if tx_id in STORE.suspicious_by_id:
+            known_record = {
+                "id": str(tx_id),
+                "txId": tx_id,
+                "transaction_id": tx_id,
+                "timestep": int(STORE.suspicious_by_id[tx_id]["Time step"]),
+                "status": "inference_unavailable",
+                "requested_model": model,
+                "explanation": (
+                    "This held-out transaction is known, but no cached model prediction is available "
+                    "and the native PyTorch inference runtime could not be initialized."
+                ),
+            }
+            return {
+                "status": "inference_unavailable",
+                "execution_mode": "no_model_runtime_or_prediction_cache",
+                "record": known_record,
+                "records": [known_record],
+                "items": [known_record],
+                "data": [known_record],
+            }
+
         # 3. If transaction is outside held-out test range (35–49) or unknown
         unsupp_rec = {
             "id": str(tx_id),
@@ -870,19 +1105,14 @@ class DualStackThreadingHTTPServer(ThreadingHTTPServer):
 def run_server(port: int = 8080):
     os.chdir(PROJECT_ROOT)
     STORE.load_data()
-    server_address = ("", port)
-    try:
-        httpd = DualStackThreadingHTTPServer(server_address, DashboardHandler)
-    except Exception as e:
-        print(f"[Notice] Dual-stack IPv6 socket fallback to IPv4: {e}")
-        httpd = ThreadingHTTPServer(server_address, DashboardHandler)
+    server_address = ("127.0.0.1", port)
+    httpd = ThreadingHTTPServer(server_address, DashboardHandler)
 
     print(f"\n" + "=" * 78)
     print(f"  ELLIPTIC++ AI FINANCIAL-CRIME INTELLIGENCE DASHBOARD")
     print(f"  -> Browser URL:   http://localhost:{port}/")
     print(f"  -> Direct IPv4:   http://127.0.0.1:{port}/")
-    print(f"  -> Direct IPv6:   http://[::1]:{port}/")
-    print(f"  -> Network Mode:  Dual-Stack Multi-Threaded Standard Library Engine")
+    print(f"  -> Network Mode:  Localhost-only Multi-Threaded Standard Library Engine")
     print(f"  -> Endpoints:     /, /api/overview, /api/suspicious, /api/models,")
     print(f"                    /api/network, /api/score, /figures/<figure_svg>")
     print(f"=" * 78 + "\n")

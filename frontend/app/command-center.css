@@ -9,7 +9,7 @@
 :root {
   --cyan: #22d3ee;
   --cyan-bright: #00f2fe;
-  --violet: #a855f7;
+  --violet: #b58b32;
   --coral: #f43f5e;
   --amber: #fbbf24;
   --emerald: #34d399;
@@ -573,9 +573,9 @@
 .model-chip {
   display: inline-block;
   padding: 4px 10px;
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  border: 1px solid rgba(198, 155, 69, 0.35);
   border-radius: 6px;
-  background: rgba(168, 85, 247, 0.12);
+  background: rgba(198, 155, 69, 0.12);
   color: #c084fc;
   font: 600 12.5px/1 var(--font-mono);
 }
@@ -808,7 +808,7 @@
   padding: 0 24px;
   border: 1px solid var(--cyan);
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(34, 211, 238, 0.3), rgba(168, 85, 247, 0.2));
+  background: linear-gradient(135deg, rgba(89, 107, 69, 0.3), rgba(198, 155, 69, 0.2));
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
@@ -817,7 +817,7 @@
 }
 
 .score-submit-btn:hover {
-  background: linear-gradient(135deg, rgba(34, 211, 238, 0.45), rgba(168, 85, 247, 0.35));
+  background: linear-gradient(135deg, rgba(89, 107, 69, 0.45), rgba(198, 155, 69, 0.35));
   box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
 }
 

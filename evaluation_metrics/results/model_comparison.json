@@ -1,0 +1,1094 @@
+{
+  "models": [
+    "gcn",
+    "graphsage",
+    "gru",
+    "logistic",
+    "risk_scorer"
+  ],
+  "positive_class": "illicit (source class 1; encoded 1)",
+  "threshold_protocol": "Existing inference class decisions; 0.5 for classifier models, saved risk-artifact threshold for calibrated risk.",
+  "regression_interpretation": "Continuous class probabilities are compared with binary labels for descriptive score-error metrics; the project is a classifier, not a separate regression task.",
+  "bias_interpretation": "Read signed bias values and their magnitudes; bias is not ranked as simply higher or lower.",
+  "comparisons": {
+    "rmse": {
+      "desirable": "lower",
+      "values": {
+        "gcn": 0.35394361737830593,
+        "graphsage": 0.2792395734126475,
+        "gru": 0.28080287086834677,
+        "logistic": 0.36322222439844454,
+        "risk_scorer": 0.22975809570521546
+      },
+      "ranking": [
+        "risk_scorer",
+        "graphsage",
+        "gru",
+        "gcn",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "mse": {
+      "desirable": "lower",
+      "values": {
+        "gcn": 0.12527608428284062,
+        "graphsage": 0.07797473935967734,
+        "gru": 0.07885025228790542,
+        "logistic": 0.131930384296954,
+        "risk_scorer": 0.05278878254208695
+      },
+      "ranking": [
+        "risk_scorer",
+        "graphsage",
+        "gru",
+        "gcn",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "mae": {
+      "desirable": "lower",
+      "values": {
+        "gcn": 0.3128657043196928,
+        "graphsage": 0.18478426716823268,
+        "gru": 0.16087901322364623,
+        "logistic": 0.27469606761032006,
+        "risk_scorer": 0.09326419768903581
+      },
+      "ranking": [
+        "risk_scorer",
+        "gru",
+        "graphsage",
+        "logistic",
+        "gcn"
+      ],
+      "excluded_models": {}
+    },
+    "mape": {
+      "desirable": "lower",
+      "values": {},
+      "ranking": [],
+      "excluded_models": {
+        "gcn": "undefined",
+        "graphsage": "undefined",
+        "gru": "undefined",
+        "logistic": "undefined",
+        "risk_scorer": "undefined"
+      }
+    },
+    "r2": {
+      "desirable": "higher",
+      "values": {
+        "gcn": -1.0622835516128641,
+        "graphsage": -0.2836130961732879,
+        "gru": -0.29802571069141637,
+        "logistic": -1.1718260356804553,
+        "risk_scorer": 0.1309958435448495
+      },
+      "ranking": [
+        "risk_scorer",
+        "graphsage",
+        "gru",
+        "gcn",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "nrmse": {
+      "desirable": "lower",
+      "values": {
+        "gcn": 0.35394361737830593,
+        "graphsage": 0.2792395734126475,
+        "gru": 0.28080287086834677,
+        "logistic": 0.36322222439844454,
+        "risk_scorer": 0.22975809570521546
+      },
+      "ranking": [
+        "risk_scorer",
+        "graphsage",
+        "gru",
+        "gcn",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "medae": {
+      "desirable": "lower",
+      "values": {
+        "gcn": 0.3553006947040558,
+        "graphsage": 0.09155771136283875,
+        "gru": 0.0483557004481554,
+        "logistic": 0.2531265914440155,
+        "risk_scorer": 0.010010829082731236
+      },
+      "ranking": [
+        "risk_scorer",
+        "gru",
+        "graphsage",
+        "logistic",
+        "gcn"
+      ],
+      "excluded_models": {}
+    },
+    "bias": {
+      "desirable": "near zero; inspect sign and magnitude",
+      "values": {
+        "gcn": 0.24567050245206346,
+        "graphsage": 0.11891655651956692,
+        "gru": 0.13432589884941487,
+        "logistic": 0.2286544380006229,
+        "risk_scorer": 0.058872748002296256
+      },
+      "ranking": [],
+      "excluded_models": {}
+    },
+    "accuracy": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.9092981403719256,
+        "graphsage": 0.8943611277744451,
+        "gru": 0.8946010797840432,
+        "logistic": 0.7992201559688062,
+        "risk_scorer": 0.9349730053989203
+      },
+      "ranking": [
+        "risk_scorer",
+        "gcn",
+        "gru",
+        "graphsage",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "precision": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.36618839675608233,
+        "graphsage": 0.31655844155844154,
+        "gru": 0.35548885077186965,
+        "logistic": 0.21151885830784914,
+        "risk_scorer": 0.49968294229549776
+      },
+      "ranking": [
+        "risk_scorer",
+        "gcn",
+        "gru",
+        "graphsage",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "recall": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.5420129270544783,
+        "graphsage": 0.5401662049861495,
+        "gru": 0.765466297322253,
+        "logistic": 0.7663896583564174,
+        "risk_scorer": 0.7276084949215144
+      },
+      "ranking": [
+        "logistic",
+        "gru",
+        "risk_scorer",
+        "gcn",
+        "graphsage"
+      ],
+      "excluded_models": {}
+    },
+    "f1_score": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.4370811615785555,
+        "graphsage": 0.3991811668372569,
+        "gru": 0.4855051244509517,
+        "logistic": 0.3315358498102656,
+        "risk_scorer": 0.5924812030075188
+      },
+      "ranking": [
+        "risk_scorer",
+        "gru",
+        "gcn",
+        "graphsage",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "specificity": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.9348174761018798,
+        "graphsage": 0.9189709373195611,
+        "gru": 0.903573490729454,
+        "logistic": 0.8015012510425354,
+        "risk_scorer": 0.9493808943350228
+      },
+      "ranking": [
+        "risk_scorer",
+        "gcn",
+        "graphsage",
+        "gru",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "mcc": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.39863853611442,
+        "graphsage": 0.3604404597179698,
+        "gru": 0.47537778324965435,
+        "logistic": 0.32992023754064914,
+        "risk_scorer": 0.5701297783861566
+      },
+      "ranking": [
+        "risk_scorer",
+        "gru",
+        "gcn",
+        "graphsage",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "cohens_kappa": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.3897605148539143,
+        "graphsage": 0.3455677220693435,
+        "gru": 0.4354102009644445,
+        "logistic": 0.25574903278503863,
+        "risk_scorer": 0.5584690553666342
+      },
+      "ranking": [
+        "risk_scorer",
+        "gru",
+        "gcn",
+        "graphsage",
+        "logistic"
+      ],
+      "excluded_models": {}
+    },
+    "balanced_accuracy": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.7384152015781791,
+        "graphsage": 0.7295685711528553,
+        "gru": 0.8345198940258536,
+        "logistic": 0.7839454546994764,
+        "risk_scorer": 0.8384946946282685
+      },
+      "ranking": [
+        "risk_scorer",
+        "gru",
+        "logistic",
+        "gcn",
+        "graphsage"
+      ],
+      "excluded_models": {}
+    },
+    "auc_roc": {
+      "desirable": "higher",
+      "values": {
+        "gcn": 0.8314609903214442,
+        "graphsage": 0.8694244161727452,
+        "gru": 0.9328196645155145,
+        "logistic": 0.8677294944925634,
+        "risk_scorer": 0.9212896771411601
+      },
+      "ranking": [
+        "gru",
+        "risk_scorer",
+        "graphsage",
+        "logistic",
+        "gcn"
+      ],
+      "excluded_models": {}
+    },
+    "log_loss": {
+      "desirable": "lower",
+      "values": {
+        "gcn": 0.4047687114968819,
+        "graphsage": 0.25507338600541984,
+        "gru": 0.2679535307669714,
+        "logistic": 0.3929038920383796,
+        "risk_scorer": 0.1985698947380657
+      },
+      "ranking": [
+        "risk_scorer",
+        "graphsage",
+        "gru",
+        "logistic",
+        "gcn"
+      ],
+      "excluded_models": {}
+    }
+  },
+  "model_results": [
+    {
+      "model": "gcn",
+      "task": "binary transaction classification",
+      "prediction_source": "models.inference.EllipticInference.score_batch; risk_scorer uses its saved calibrated GRU score.",
+      "population": {
+        "test_rows": 67504,
+        "class_1_illicit": 1083,
+        "class_2_licit": 15587,
+        "class_3_unknown_excluded": 50834,
+        "labeled_rows": 16670,
+        "test_timesteps": [
+          35,
+          49
+        ],
+        "positive_class": "illicit (source class 1; encoded 1)",
+        "labeled": 16670,
+        "illicit": 1083,
+        "licit": 15587,
+        "unknown_excluded": 50834,
+        "decision_threshold": 0.5
+      },
+      "regression_metrics": {
+        "rmse": {
+          "value": 0.35394361737830593,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mse": {
+          "value": 0.12527608428284062,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mae": {
+          "value": 0.3128657043196928,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mape": {
+          "value": null,
+          "status": "undefined",
+          "explanation": "MAPE is undefined when any y_true value is zero"
+        },
+        "r2": {
+          "value": -1.0622835516128641,
+          "status": "calculated",
+          "explanation": null
+        },
+        "nrmse": {
+          "value": 0.35394361737830593,
+          "status": "calculated",
+          "explanation": null
+        },
+        "medae": {
+          "value": 0.3553006947040558,
+          "status": "calculated",
+          "explanation": null
+        },
+        "bias": {
+          "value": 0.24567050245206346,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "classification_metrics": {
+        "accuracy": {
+          "value": 0.9092981403719256,
+          "status": "calculated",
+          "explanation": null
+        },
+        "precision": {
+          "value": 0.36618839675608233,
+          "status": "calculated",
+          "explanation": null
+        },
+        "recall": {
+          "value": 0.5420129270544783,
+          "status": "calculated",
+          "explanation": null
+        },
+        "f1_score": {
+          "value": 0.4370811615785555,
+          "status": "calculated",
+          "explanation": null
+        },
+        "specificity": {
+          "value": 0.9348174761018798,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mcc": {
+          "value": 0.39863853611442,
+          "status": "calculated",
+          "explanation": null
+        },
+        "cohens_kappa": {
+          "value": 0.3897605148539143,
+          "status": "calculated",
+          "explanation": null
+        },
+        "balanced_accuracy": {
+          "value": 0.7384152015781791,
+          "status": "calculated",
+          "explanation": null
+        },
+        "auc_roc": {
+          "value": 0.8314609903214442,
+          "status": "calculated",
+          "explanation": null
+        },
+        "log_loss": {
+          "value": 0.4047687114968819,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "saved_metrics_reference_check": {
+        "status": "match",
+        "compared_metrics": [
+          "accuracy",
+          "precision",
+          "recall",
+          "f1_score"
+        ],
+        "saved_confusion_matrix_licit_illicit": [
+          [
+            14571,
+            1016
+          ],
+          [
+            496,
+            587
+          ]
+        ],
+        "calculated_confusion_matrix_licit_illicit": [
+          [
+            14571,
+            1016
+          ],
+          [
+            496,
+            587
+          ]
+        ],
+        "mismatches": {},
+        "source": "models/gcn/artifacts/gcn_baseline_metrics.json"
+      },
+      "confusion_matrix_licit_illicit": [
+        14571,
+        1016,
+        496,
+        587
+      ]
+    },
+    {
+      "model": "graphsage",
+      "task": "binary transaction classification",
+      "prediction_source": "models.inference.EllipticInference.score_batch; risk_scorer uses its saved calibrated GRU score.",
+      "population": {
+        "test_rows": 67504,
+        "class_1_illicit": 1083,
+        "class_2_licit": 15587,
+        "class_3_unknown_excluded": 50834,
+        "labeled_rows": 16670,
+        "test_timesteps": [
+          35,
+          49
+        ],
+        "positive_class": "illicit (source class 1; encoded 1)",
+        "labeled": 16670,
+        "illicit": 1083,
+        "licit": 15587,
+        "unknown_excluded": 50834,
+        "decision_threshold": 0.5
+      },
+      "regression_metrics": {
+        "rmse": {
+          "value": 0.2792395734126475,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mse": {
+          "value": 0.07797473935967734,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mae": {
+          "value": 0.18478426716823268,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mape": {
+          "value": null,
+          "status": "undefined",
+          "explanation": "MAPE is undefined when any y_true value is zero"
+        },
+        "r2": {
+          "value": -0.2836130961732879,
+          "status": "calculated",
+          "explanation": null
+        },
+        "nrmse": {
+          "value": 0.2792395734126475,
+          "status": "calculated",
+          "explanation": null
+        },
+        "medae": {
+          "value": 0.09155771136283875,
+          "status": "calculated",
+          "explanation": null
+        },
+        "bias": {
+          "value": 0.11891655651956692,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "classification_metrics": {
+        "accuracy": {
+          "value": 0.8943611277744451,
+          "status": "calculated",
+          "explanation": null
+        },
+        "precision": {
+          "value": 0.31655844155844154,
+          "status": "calculated",
+          "explanation": null
+        },
+        "recall": {
+          "value": 0.5401662049861495,
+          "status": "calculated",
+          "explanation": null
+        },
+        "f1_score": {
+          "value": 0.3991811668372569,
+          "status": "calculated",
+          "explanation": null
+        },
+        "specificity": {
+          "value": 0.9189709373195611,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mcc": {
+          "value": 0.3604404597179698,
+          "status": "calculated",
+          "explanation": null
+        },
+        "cohens_kappa": {
+          "value": 0.3455677220693435,
+          "status": "calculated",
+          "explanation": null
+        },
+        "balanced_accuracy": {
+          "value": 0.7295685711528553,
+          "status": "calculated",
+          "explanation": null
+        },
+        "auc_roc": {
+          "value": 0.8694244161727452,
+          "status": "calculated",
+          "explanation": null
+        },
+        "log_loss": {
+          "value": 0.25507338600541984,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "saved_metrics_reference_check": {
+        "status": "match",
+        "compared_metrics": [
+          "accuracy",
+          "precision",
+          "recall",
+          "f1_score"
+        ],
+        "saved_confusion_matrix_licit_illicit": [
+          [
+            14324,
+            1263
+          ],
+          [
+            498,
+            585
+          ]
+        ],
+        "calculated_confusion_matrix_licit_illicit": [
+          [
+            14324,
+            1263
+          ],
+          [
+            498,
+            585
+          ]
+        ],
+        "mismatches": {},
+        "source": "models/graphsage/artifacts/graphsage_baseline_metrics.json"
+      },
+      "confusion_matrix_licit_illicit": [
+        14324,
+        1263,
+        498,
+        585
+      ]
+    },
+    {
+      "model": "gru",
+      "task": "binary transaction classification",
+      "prediction_source": "models.inference.EllipticInference.score_batch; risk_scorer uses its saved calibrated GRU score.",
+      "population": {
+        "test_rows": 67504,
+        "class_1_illicit": 1083,
+        "class_2_licit": 15587,
+        "class_3_unknown_excluded": 50834,
+        "labeled_rows": 16670,
+        "test_timesteps": [
+          35,
+          49
+        ],
+        "positive_class": "illicit (source class 1; encoded 1)",
+        "labeled": 16670,
+        "illicit": 1083,
+        "licit": 15587,
+        "unknown_excluded": 50834,
+        "decision_threshold": 0.5
+      },
+      "regression_metrics": {
+        "rmse": {
+          "value": 0.28080287086834677,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mse": {
+          "value": 0.07885025228790542,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mae": {
+          "value": 0.16087901322364623,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mape": {
+          "value": null,
+          "status": "undefined",
+          "explanation": "MAPE is undefined when any y_true value is zero"
+        },
+        "r2": {
+          "value": -0.29802571069141637,
+          "status": "calculated",
+          "explanation": null
+        },
+        "nrmse": {
+          "value": 0.28080287086834677,
+          "status": "calculated",
+          "explanation": null
+        },
+        "medae": {
+          "value": 0.0483557004481554,
+          "status": "calculated",
+          "explanation": null
+        },
+        "bias": {
+          "value": 0.13432589884941487,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "classification_metrics": {
+        "accuracy": {
+          "value": 0.8946010797840432,
+          "status": "calculated",
+          "explanation": null
+        },
+        "precision": {
+          "value": 0.35548885077186965,
+          "status": "calculated",
+          "explanation": null
+        },
+        "recall": {
+          "value": 0.765466297322253,
+          "status": "calculated",
+          "explanation": null
+        },
+        "f1_score": {
+          "value": 0.4855051244509517,
+          "status": "calculated",
+          "explanation": null
+        },
+        "specificity": {
+          "value": 0.903573490729454,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mcc": {
+          "value": 0.47537778324965435,
+          "status": "calculated",
+          "explanation": null
+        },
+        "cohens_kappa": {
+          "value": 0.4354102009644445,
+          "status": "calculated",
+          "explanation": null
+        },
+        "balanced_accuracy": {
+          "value": 0.8345198940258536,
+          "status": "calculated",
+          "explanation": null
+        },
+        "auc_roc": {
+          "value": 0.9328196645155145,
+          "status": "calculated",
+          "explanation": null
+        },
+        "log_loss": {
+          "value": 0.2679535307669714,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "saved_metrics_reference_check": {
+        "status": "match",
+        "compared_metrics": [
+          "accuracy",
+          "precision",
+          "recall",
+          "f1_score"
+        ],
+        "saved_confusion_matrix_licit_illicit": [
+          [
+            14084,
+            1503
+          ],
+          [
+            254,
+            829
+          ]
+        ],
+        "calculated_confusion_matrix_licit_illicit": [
+          [
+            14084,
+            1503
+          ],
+          [
+            254,
+            829
+          ]
+        ],
+        "mismatches": {},
+        "source": "models/gru/artifacts/temporal_gru_baseline_metrics.json"
+      },
+      "confusion_matrix_licit_illicit": [
+        14084,
+        1503,
+        254,
+        829
+      ]
+    },
+    {
+      "model": "logistic",
+      "task": "binary transaction classification",
+      "prediction_source": "models.inference.EllipticInference.score_batch; risk_scorer uses its saved calibrated GRU score.",
+      "population": {
+        "test_rows": 67504,
+        "class_1_illicit": 1083,
+        "class_2_licit": 15587,
+        "class_3_unknown_excluded": 50834,
+        "labeled_rows": 16670,
+        "test_timesteps": [
+          35,
+          49
+        ],
+        "positive_class": "illicit (source class 1; encoded 1)",
+        "labeled": 16670,
+        "illicit": 1083,
+        "licit": 15587,
+        "unknown_excluded": 50834,
+        "decision_threshold": 0.5
+      },
+      "regression_metrics": {
+        "rmse": {
+          "value": 0.36322222439844454,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mse": {
+          "value": 0.131930384296954,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mae": {
+          "value": 0.27469606761032006,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mape": {
+          "value": null,
+          "status": "undefined",
+          "explanation": "MAPE is undefined when any y_true value is zero"
+        },
+        "r2": {
+          "value": -1.1718260356804553,
+          "status": "calculated",
+          "explanation": null
+        },
+        "nrmse": {
+          "value": 0.36322222439844454,
+          "status": "calculated",
+          "explanation": null
+        },
+        "medae": {
+          "value": 0.2531265914440155,
+          "status": "calculated",
+          "explanation": null
+        },
+        "bias": {
+          "value": 0.2286544380006229,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "classification_metrics": {
+        "accuracy": {
+          "value": 0.7992201559688062,
+          "status": "calculated",
+          "explanation": null
+        },
+        "precision": {
+          "value": 0.21151885830784914,
+          "status": "calculated",
+          "explanation": null
+        },
+        "recall": {
+          "value": 0.7663896583564174,
+          "status": "calculated",
+          "explanation": null
+        },
+        "f1_score": {
+          "value": 0.3315358498102656,
+          "status": "calculated",
+          "explanation": null
+        },
+        "specificity": {
+          "value": 0.8015012510425354,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mcc": {
+          "value": 0.32992023754064914,
+          "status": "calculated",
+          "explanation": null
+        },
+        "cohens_kappa": {
+          "value": 0.25574903278503863,
+          "status": "calculated",
+          "explanation": null
+        },
+        "balanced_accuracy": {
+          "value": 0.7839454546994764,
+          "status": "calculated",
+          "explanation": null
+        },
+        "auc_roc": {
+          "value": 0.8677294944925634,
+          "status": "calculated",
+          "explanation": null
+        },
+        "log_loss": {
+          "value": 0.3929038920383796,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "saved_metrics_reference_check": {
+        "status": "match",
+        "compared_metrics": [
+          "accuracy",
+          "precision",
+          "recall",
+          "f1_score"
+        ],
+        "saved_confusion_matrix_licit_illicit": [
+          [
+            12493,
+            3094
+          ],
+          [
+            253,
+            830
+          ]
+        ],
+        "calculated_confusion_matrix_licit_illicit": [
+          [
+            12493,
+            3094
+          ],
+          [
+            253,
+            830
+          ]
+        ],
+        "mismatches": {},
+        "source": "models/logistic_baseline/artifacts/logistic_baseline_metrics.json"
+      },
+      "confusion_matrix_licit_illicit": [
+        12493,
+        3094,
+        253,
+        830
+      ]
+    },
+    {
+      "model": "risk_scorer",
+      "task": "binary transaction classification",
+      "prediction_source": "models.inference.EllipticInference.score_batch; risk_scorer uses its saved calibrated GRU score.",
+      "population": {
+        "test_rows": 67504,
+        "class_1_illicit": 1083,
+        "class_2_licit": 15587,
+        "class_3_unknown_excluded": 50834,
+        "labeled_rows": 16670,
+        "test_timesteps": [
+          35,
+          49
+        ],
+        "positive_class": "illicit (source class 1; encoded 1)",
+        "labeled": 16670,
+        "illicit": 1083,
+        "licit": 15587,
+        "unknown_excluded": 50834,
+        "decision_threshold": 0.5
+      },
+      "regression_metrics": {
+        "rmse": {
+          "value": 0.22975809570521546,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mse": {
+          "value": 0.05278878254208695,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mae": {
+          "value": 0.09326419768903581,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mape": {
+          "value": null,
+          "status": "undefined",
+          "explanation": "MAPE is undefined when any y_true value is zero"
+        },
+        "r2": {
+          "value": 0.1309958435448495,
+          "status": "calculated",
+          "explanation": null
+        },
+        "nrmse": {
+          "value": 0.22975809570521546,
+          "status": "calculated",
+          "explanation": null
+        },
+        "medae": {
+          "value": 0.010010829082731236,
+          "status": "calculated",
+          "explanation": null
+        },
+        "bias": {
+          "value": 0.058872748002296256,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "classification_metrics": {
+        "accuracy": {
+          "value": 0.9349730053989203,
+          "status": "calculated",
+          "explanation": null
+        },
+        "precision": {
+          "value": 0.49968294229549776,
+          "status": "calculated",
+          "explanation": null
+        },
+        "recall": {
+          "value": 0.7276084949215144,
+          "status": "calculated",
+          "explanation": null
+        },
+        "f1_score": {
+          "value": 0.5924812030075188,
+          "status": "calculated",
+          "explanation": null
+        },
+        "specificity": {
+          "value": 0.9493808943350228,
+          "status": "calculated",
+          "explanation": null
+        },
+        "mcc": {
+          "value": 0.5701297783861566,
+          "status": "calculated",
+          "explanation": null
+        },
+        "cohens_kappa": {
+          "value": 0.5584690553666342,
+          "status": "calculated",
+          "explanation": null
+        },
+        "balanced_accuracy": {
+          "value": 0.8384946946282685,
+          "status": "calculated",
+          "explanation": null
+        },
+        "auc_roc": {
+          "value": 0.9212896771411601,
+          "status": "calculated",
+          "explanation": null
+        },
+        "log_loss": {
+          "value": 0.1985698947380657,
+          "status": "calculated",
+          "explanation": null
+        }
+      },
+      "saved_metrics_reference_check": {
+        "status": "match",
+        "compared_metrics": [
+          "accuracy",
+          "precision",
+          "recall",
+          "f1_score"
+        ],
+        "saved_confusion_matrix_licit_illicit": [
+          [
+            14798,
+            789
+          ],
+          [
+            295,
+            788
+          ]
+        ],
+        "calculated_confusion_matrix_licit_illicit": [
+          [
+            14798,
+            789
+          ],
+          [
+            295,
+            788
+          ]
+        ],
+        "mismatches": {},
+        "source": "models/risk_predictor/artifacts/risk_predictor_metrics.json"
+      },
+      "confusion_matrix_licit_illicit": [
+        14798,
+        789,
+        295,
+        788
+      ]
+    }
+  ]
+}
