@@ -2,13 +2,14 @@
 
 Requires zero external packages (pure Python standard library: http.server, json, csv, urllib).
 Provides REST endpoints for overview KPIs, high-risk explorer, model benchmarks,
-ego-network visualizer, and on-demand model inference.
+and on-demand model inference.
 """
 
 from __future__ import annotations
 
 import csv
 import json
+import math
 import os
 import socket
 import subprocess
@@ -34,6 +35,68 @@ MODEL_DISPLAY_NAMES = {
     "logistic": "Logistic Regression",
     "risk_scorer": "Calibrated Risk Scorer",
 }
+
+
+def calculate_probability_regression_metrics(predictions_path: Path, expected_count: int = 16670) -> dict:
+    """Calculate probability-error metrics from a saved labeled test prediction CSV."""
+    actual = []
+    probability = []
+    transaction_ids = set()
+    with predictions_path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        required = {"txId", "timestep", "label", "probability"}
+        if not required.issubset(reader.fieldnames or ()):
+            raise ValueError(f"Prediction CSV is missing required columns: {predictions_path.name}")
+        for row in reader:
+            tx_id = str(row["txId"]).strip()
+            timestep = int(row["timestep"])
+            label = int(row["label"])
+            score = float(row["probability"])
+            if not tx_id or tx_id in transaction_ids:
+                raise ValueError(f"Prediction CSV has a missing or duplicate transaction ID: {predictions_path.name}")
+            if not 35 <= timestep <= 49 or label not in (0, 1):
+                raise ValueError(f"Prediction CSV contains an unsupported test row: {predictions_path.name}")
+            if not math.isfinite(score) or not 0.0 <= score <= 1.0:
+                raise ValueError(f"Prediction CSV contains an invalid probability: {predictions_path.name}")
+            transaction_ids.add(tx_id)
+            actual.append(float(label))
+            probability.append(score)
+
+    if len(actual) != expected_count:
+        raise ValueError(f"Expected {expected_count} labeled predictions in {predictions_path.name}, found {len(actual)}")
+
+    count = len(actual)
+    errors = [score - label for label, score in zip(actual, probability, strict=True)]
+    squared_errors = [error * error for error in errors]
+    absolute_errors = sorted(abs(error) for error in errors)
+    mse = math.fsum(squared_errors) / count
+    rmse = math.sqrt(mse)
+    mae = math.fsum(absolute_errors) / count
+    middle = count // 2
+    medae = absolute_errors[middle] if count % 2 else (absolute_errors[middle - 1] + absolute_errors[middle]) / 2.0
+    mean_actual = math.fsum(actual) / count
+    total_sum_squares = math.fsum((label - mean_actual) ** 2 for label in actual)
+    sum_squared_errors = math.fsum(squared_errors)
+    target_range = max(actual) - min(actual)
+
+    values = {
+        "rmse": rmse,
+        "mse": mse,
+        "mae": mae,
+        "mape": None if any(label == 0.0 for label in actual) else math.fsum(abs(error / label) for label, error in zip(actual, errors, strict=True)) / count * 100.0,
+        "r2": 1.0 - sum_squared_errors / total_sum_squares if total_sum_squares else None,
+        "nrmse": rmse / target_range if target_range else None,
+        "medae": medae,
+        "bias": math.fsum(errors) / count,
+    }
+    return {
+        key: {
+            "value": value,
+            "status": "calculated" if value is not None else "undefined",
+            "sample_count": count,
+        }
+        for key, value in values.items()
+    }
 
 # When launched as `python dashboard/server.py`, Python places `dashboard/`
 # rather than the repository root first on sys.path. Make the sibling `models`
@@ -95,7 +158,7 @@ class DataStore:
                 self.suspicious_by_id[int(r["txId"])] = r
             print(f"  -> Loaded {len(self.suspicious_rows):,} suspicious transactions")
 
-        # 2. Graph Edges (Adjacency Lists for Ego-Network Visualizer)
+        # 2. Graph Edges (Degree fallback for inference responses)
         edges_path = DATA_DIR / "raw/elliptic/txs_edgelist.csv"
         if edges_path.exists():
             edge_count = 0
@@ -226,8 +289,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._handle_api_suspicious(params)
         elif path == "/api/models":
             self._handle_api_models()
-        elif path == "/api/network":
-            self._handle_api_network(params)
         elif path == "/api/score":
             self._handle_api_score_get(params)
         elif path == "/api/evaluation":
@@ -305,12 +366,68 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 {"metric": metric, "results": values}
                 for metric, values in metric_rows.get(task, {}).items()
             ]
+
+        before_dir = EVALUATION_DIR / "before_preprocessing"
+        before_files = {
+            "gcn": "gcn.json",
+            "graphsage": "graphsage.json",
+            "gru": "gru.json",
+            "logistic": "logistic_regression.json",
+            "risk_scorer": "calibrated_risk_scorer.json",
+        }
+        before_prediction_files = {
+            "gcn": "gcn_test_predictions.csv",
+            "graphsage": "graphsage_test_predictions.csv",
+            "gru": "gru_test_predictions.csv",
+            "logistic": "logistic_regression_test_predictions.csv",
+            "risk_scorer": "calibrated_risk_scorer_test_predictions.csv",
+        }
+        before_metrics = (
+            "accuracy", "precision", "recall", "specificity", "f1",
+            "pr_auc", "roc_auc", "fpr", "fnr", "error_rate",
+        )
+        before_models = {}
+        before_reason = None
+        try:
+            run_summary = json.loads((before_dir / "experiment_summary.json").read_text(encoding="utf-8"))
+            if run_summary.get("schema_version") != "elliptic-before-preprocessing-run-v1" or not run_summary.get("completed"):
+                raise ValueError("The before-preprocessing experiment is not marked complete.")
+            for model_id, filename in before_files.items():
+                report = json.loads((before_dir / filename).read_text(encoding="utf-8"))
+                if report.get("schema_version") != "elliptic-before-preprocessing-v1":
+                    raise ValueError(f"Unsupported before-preprocessing report for {model_id}.")
+                test = report.get("test", {})
+                if test.get("count") != 16670 or report.get("test_population", {}).get("timesteps") != [35, 49]:
+                    raise ValueError(f"Before-preprocessing test population does not match for {model_id}.")
+                values = {key: test.get(key) for key in before_metrics}
+                if any(not isinstance(value, (int, float)) or not math.isfinite(value) for value in values.values()):
+                    raise ValueError(f"Before-preprocessing metrics are incomplete or non-finite for {model_id}.")
+                before_models[model_id] = {
+                    "metrics": values,
+                    "regression_metrics": calculate_probability_regression_metrics(
+                        before_dir / "artifacts" / before_prediction_files[model_id]
+                    ),
+                    "test_count": test["count"],
+                    "device": report.get("device"),
+                    "selected_epoch": report.get("validation", {}).get("selected_epoch"),
+                    "source": str((before_dir / filename).relative_to(PROJECT_ROOT)).replace("\\", "/"),
+                }
+        except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
+            before_reason = str(exc)
+        before_status = "available" if len(before_models) == len(before_files) else ("partial" if before_models else "unavailable")
+
         self._send_json({
             "schema_version": "elliptic-evaluation-api-v1",
             "status": "available" if any(groups.values()) else "unavailable",
             "source": "evaluation_metrics/results/{regression,classification}_results.csv",
             "models": [{"id": key, "name": value} for key, value in MODEL_DISPLAY_NAMES.items()],
             "groups": groups,
+            "before_preprocessing": {
+                "status": before_status,
+                "source": "evaluation_metrics/before_preprocessing/{model}.json and artifacts/*_test_predictions.csv",
+                "models": before_models,
+                "reason": before_reason,
+            },
         })
 
     def _handle_api_graphs(self):
@@ -834,63 +951,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
             m["model"] = m.get("id", "")
         self._send_json(data)
 
-    def _handle_api_network(self, params: dict[str, list[str]]):
-        """Extracts ego-network neighborhood (inflows, outflows, and neighbor risk)."""
-        STORE.load_data()
-        tx_id_str = params.get("tx_id", [""])[0].strip()
-        if not tx_id_str:
-            tx_id = int(STORE.suspicious_rows[0]["txId"]) if STORE.suspicious_rows else 218061363
-        else:
-            try:
-                tx_id = int(tx_id_str)
-            except ValueError:
-                self._send_json({"error": "Invalid tx_id integer"}, status=400)
-                return
-
-        inflows = STORE.in_edges.get(tx_id, [])
-        outflows = STORE.out_edges.get(tx_id, [])
-
-        # Gather node details
-        def get_node_info(nid: int, relation: str):
-            susp_data = STORE.suspicious_by_id.get(nid, {})
-            risk_val = float(susp_data.get("calibrated_illicit_risk", 0.0)) if susp_data else None
-            return {
-                "id": str(nid),
-                "txId": nid,
-                "transaction_id": nid,
-                "relation": relation,
-                "calibrated_risk": round(risk_val, 4) if risk_val is not None else None,
-                "timestep": int(susp_data.get("Time step", 0)) if susp_data else None,
-                "in_degree": int(susp_data.get("in_degree_asof", len(STORE.in_edges.get(nid, [])))),
-                "out_degree": int(susp_data.get("out_degree_asof", len(STORE.out_edges.get(nid, [])))),
-                "is_target": (nid == tx_id),
-            }
-
-        center_node = get_node_info(tx_id, "target")
-        neighbor_nodes = [get_node_info(u, "inflow") for u in inflows] + [get_node_info(v, "outflow") for v in outflows]
-        all_nodes = [center_node] + neighbor_nodes
-
-        # Edges
-        edges = []
-        for u in inflows:
-            edges.append({"source": u, "target": tx_id, "type": "inflow"})
-        for v in outflows:
-            edges.append({"source": tx_id, "target": v, "type": "outflow"})
-
-        data = {
-            "status": "fully_functional",
-            "query_txId": tx_id,
-            "center_node": center_node,
-            "total_inflows": len(inflows),
-            "total_outflows": len(outflows),
-            "total_degree": len(inflows) + len(outflows),
-            "nodes": all_nodes,
-            "edges": edges,
-            "records": all_nodes,
-            "items": all_nodes,
-        }
-        self._send_json(data)
-
     def _handle_api_score_get(self, params: dict[str, list[str]]):
         """Serves default scored transaction on GET /api/score for SWR component initialization."""
         STORE.load_data()
@@ -1114,7 +1174,7 @@ def run_server(port: int = 8080):
     print(f"  -> Direct IPv4:   http://127.0.0.1:{port}/")
     print(f"  -> Network Mode:  Localhost-only Multi-Threaded Standard Library Engine")
     print(f"  -> Endpoints:     /, /api/overview, /api/suspicious, /api/models,")
-    print(f"                    /api/network, /api/score, /figures/<figure_svg>")
+    print(f"                    /api/score, /figures/<figure_svg>")
     print(f"=" * 78 + "\n")
     try:
         httpd.serve_forever()

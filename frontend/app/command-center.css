@@ -144,7 +144,7 @@
 .command-main {
   width: 100%;
   max-width: 100%;
-  padding: 28px clamp(24px, 2.2vw, 40px) 160px;
+  padding: 28px clamp(24px, 2.2vw, 40px) 24px;
 }
 
 /* --- Reusable Glass Cards --- */
@@ -709,14 +709,7 @@
 }
 
 /* =========================================================================
-   View 04: Network Explorer
-   ========================================================================= */
-.immersive-network-card {
-  padding: 28px;
-}
-
-/* =========================================================================
-   View 05: Live Inference Console
+   View 04: Live Inference Console
    ========================================================================= */
 .inference-split-grid {
   display: grid;
@@ -1027,7 +1020,7 @@
 @media (max-width: 640px) {
   .command-main {
     padding-inline: 16px;
-    padding-bottom: 120px;
+    padding-bottom: 24px;
   }
   .kpi-quartet {
     grid-template-columns: 1fr;

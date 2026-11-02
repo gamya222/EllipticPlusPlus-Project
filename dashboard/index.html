@@ -160,9 +160,6 @@
         <button onclick="switchView('models')" id="btn-models" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
           <span>Model Benchmark</span>
         </button>
-        <button onclick="switchView('network')" id="btn-network" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
-          <span>Transaction Network</span>
-        </button>
         <button onclick="switchView('inference')" id="btn-inference" class="glass-nav-btn px-3.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
           <span>Live Inference</span>
           <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
@@ -472,74 +469,7 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- VIEW 4: TRANSACTION NETWORK (EGO-NETWORK VISUALIZER) -->
-    <!-- ============================================================= -->
-    <div id="view-network" class="view-panel hidden space-y-6">
-      
-      <!-- Query Control Header -->
-      <div class="glass-card rounded-2xl p-5 space-y-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <span class="text-cyan-400">✦</span> Transaction Ego-Network &amp; Directed Payment Flow
-            </h2>
-            <p class="text-xs text-slate-400">Explore Bitcoin predecessor inflows and successor outflows using the 234,355 directed transaction edgelist.</p>
-          </div>
-          <span class="badge-cyan px-2.5 py-1 rounded-full text-xs font-semibold font-mono">234,355 Directed Edges</span>
-        </div>
-
-        <!-- Query Form & Quick Presets -->
-        <div class="flex flex-col sm:flex-row items-center gap-3 pt-1">
-          <input type="text" id="network-tx-input" value="218061363" placeholder="Enter txId (e.g. 218061363)..." class="px-3.5 py-2 text-xs rounded-lg bg-[#070b14] border border-white/10 text-white focus:outline-none focus:border-cyan-400 font-mono w-full sm:w-64">
-          <button onclick="queryNetwork()" class="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-600/30 transition">
-            Visualize Ego-Network
-          </button>
-          
-          <div class="flex items-center gap-1.5 text-xs text-slate-400 flex-wrap">
-            <span>Presets:</span>
-            <button onclick="loadNetworkPill(218061363)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Rank #1 (218061363)</button>
-            <button onclick="loadNetworkPill(194332362)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Rank #2 (194332362)</button>
-            <button onclick="loadNetworkPill(13385567)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Test (13385567)</button>
-            <button onclick="loadNetworkPill(9381)" class="px-2.5 py-1 rounded-lg glass-nav-btn font-mono text-cyan-300 hover:text-white">Divergence (9381)</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Network Canvas & Telemetry Split -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        <!-- Canvas Container -->
-        <div class="lg:col-span-2 glass-card rounded-2xl p-5 space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-white tracking-wide">Directed Payment Flow Canvas</span>
-            <div class="flex items-center gap-3 text-[11px] font-sans">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block shadow-sm shadow-cyan-400"></span> Target</span>
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block shadow-sm shadow-rose-400"></span> High Risk (&ge;0.20)</span>
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span> Neighbor</span>
-            </div>
-          </div>
-          
-          <div id="network-canvas-container" class="w-full h-80 rounded-xl bg-[#070b14]/80 border border-white/5 flex items-center justify-center overflow-hidden">
-            <!-- Dynamically populated SVG graph -->
-          </div>
-        </div>
-
-        <!-- Node Telemetry Drawer -->
-        <div class="glass-card rounded-2xl p-5 space-y-4 text-xs" id="network-details-panel">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <span class="text-cyan-400">◉</span> Ego-Network Summary
-          </h3>
-          <div class="space-y-3 text-slate-300" id="network-details-body">
-            <p class="text-slate-400">Click any transaction node in the canvas to inspect its parameters.</p>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- ============================================================= -->
-    <!-- VIEW 5: LIVE MODEL INFERENCE CONSOLE -->
+    <!-- VIEW 4: LIVE MODEL INFERENCE CONSOLE -->
     <!-- ============================================================= -->
     <div id="view-inference" class="view-panel hidden space-y-6">
       
@@ -672,7 +602,6 @@
       if (viewName === 'overview') fetchOverview();
       else if (viewName === 'explorer') fetchSuspicious(currentPage);
       else if (viewName === 'models') fetchModels();
-      else if (viewName === 'network') queryNetwork();
     }
 
     // --- Overview Logic ---
@@ -731,7 +660,6 @@
           <td class="py-2.5 px-4 text-right font-bold text-cyan-400">${r.suspicion_score.toFixed(4)}</td>
           <td class="py-2.5 px-4 text-center">
             <div class="flex items-center justify-center gap-1.5 font-sans">
-              <button onclick="inspectTransaction(${r.txId})" class="px-2 py-1 rounded bg-[#070b14] hover:bg-cyan-900/40 border border-white/10 text-[11px] text-cyan-300 font-semibold transition">Ego-Net</button>
               <button onclick="inspectForInference(${r.txId})" class="px-2 py-1 rounded bg-[#070b14] hover:bg-violet-900/40 border border-white/10 text-[11px] text-violet-300 font-semibold transition">Infer</button>
             </div>
           </td>
@@ -766,13 +694,6 @@
 
     function changePage(delta) {
       fetchSuspicious(currentPage + delta);
-    }
-
-    function inspectTransaction(txId) {
-      document.getElementById('network-tx-input').value = txId;
-      document.getElementById('infer-tx-input').value = txId;
-      switchView('network');
-      queryNetwork();
     }
 
     function inspectForInference(txId) {
@@ -843,110 +764,6 @@
           });
         })
         .catch(err => console.error("Models fetch error:", err));
-    }
-
-    // --- Ego-Network Visualizer Logic ---
-    function queryNetwork() {
-      const txId = document.getElementById('network-tx-input').value.trim();
-      if (!txId) return;
-
-      fetch(`/api/network?tx_id=${txId}`)
-        .then(res => res.json())
-        .then(data => renderNetworkGraph(data))
-        .catch(err => console.error("Network fetch error:", err));
-    }
-
-    function loadNetworkPill(txId) {
-      document.getElementById('network-tx-input').value = txId;
-      queryNetwork();
-    }
-
-    function renderNetworkGraph(data) {
-      const container = document.getElementById('network-canvas-container');
-      const detailsBody = document.getElementById('network-details-body');
-      
-      if (!data || !data.nodes || data.nodes.length === 0) {
-        container.innerHTML = '<span class="text-xs text-slate-500">Transaction isolated or not found in edgelist.</span>';
-        detailsBody.innerHTML = '<span class="text-xs text-slate-500">No connectivity records for this ID.</span>';
-        return;
-      }
-
-      const c = data.center_node;
-      detailsBody.innerHTML = `
-        <div class="space-y-2 border-b border-white/10 pb-3 font-mono">
-          <div class="flex justify-between"><span class="text-slate-400 font-sans">Target txId:</span> <strong class="text-cyan-300">${c.txId}</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400 font-sans">Calibrated Risk:</span> <strong class="${c.calibrated_risk && c.calibrated_risk >= 0.20 ? 'text-rose-400' : 'text-slate-200'}">${c.calibrated_risk !== null ? c.calibrated_risk.toFixed(4) : 'N/A'}</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400 font-sans">Timestep:</span> <strong class="text-slate-200">T${c.timestep || 'N/A'}</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400 font-sans">Inflows / Outflows:</span> <strong class="text-slate-200">${data.total_inflows} / ${data.total_outflows}</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400 font-sans">Total Degree:</span> <strong class="text-slate-200">${data.total_degree}</strong></div>
-        </div>
-        <div class="pt-2">
-          <button onclick="inspectForInference(${c.txId})" class="w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs shadow transition">
-            Score txId ${c.txId} with Live Inference →
-          </button>
-        </div>
-      `;
-
-      // Draw SVG layout
-      const w = 580, h = 300;
-      const cx = w / 2, cy = h / 2;
-      const nodePos = {};
-      nodePos[c.txId] = { x: cx, y: cy, label: c.txId, color: "#38bdf8", is_center: true, risk: c.calibrated_risk };
-
-      // Inflows on left
-      const inflows = data.nodes.filter(n => n.relation === 'inflow');
-      inflows.forEach((n, idx) => {
-        const offset = (idx - (inflows.length - 1) / 2) * (240 / Math.max(inflows.length, 1));
-        const nx = cx - 180;
-        const ny = cy + offset;
-        const color = (n.calibrated_risk && n.calibrated_risk >= 0.20) ? "#f43f5e" : "#94a3b8";
-        nodePos[n.txId] = { x: nx, y: ny, label: n.txId, color: color, risk: n.calibrated_risk };
-      });
-
-      // Outflows on right
-      const outflows = data.nodes.filter(n => n.relation === 'outflow');
-      outflows.forEach((n, idx) => {
-        const offset = (idx - (outflows.length - 1) / 2) * (240 / Math.max(outflows.length, 1));
-        const nx = cx + 180;
-        const ny = cy + offset;
-        const color = (n.calibrated_risk && n.calibrated_risk >= 0.20) ? "#f43f5e" : "#34d399";
-        nodePos[n.txId] = { x: nx, y: ny, label: n.txId, color: color, risk: n.calibrated_risk };
-      });
-
-      let svg = [`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="w-full h-full">`];
-      svg.push(`
-        <defs>
-          <marker id="arrow-in" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
-          </marker>
-          <marker id="arrow-out" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399" />
-          </marker>
-        </defs>
-      `);
-
-      // Draw Edges
-      data.edges.forEach(e => {
-        const p1 = nodePos[e.source];
-        const p2 = nodePos[e.target];
-        if (p1 && p2) {
-          const isOut = (e.source === c.txId);
-          const stroke = isOut ? "#34d399" : "#38bdf8";
-          const marker = isOut ? "url(#arrow-out)" : "url(#arrow-in)";
-          svg.push(`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${stroke}" stroke-width="2" marker-end="${marker}" stroke-opacity="0.6"/>`);
-        }
-      });
-
-      // Draw Nodes
-      Object.keys(nodePos).forEach(k => {
-        const p = nodePos[k];
-        const r = p.is_center ? 18 : 12;
-        svg.push(`<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${p.color}" stroke="#070b14" stroke-width="3" cursor="pointer" onclick="inspectTransaction(${k})"/>`);
-        svg.push(`<text x="${p.x}" y="${p.y + (p.is_center ? 30 : 24)}" font-family="monospace" font-size="10" fill="#cbd5e1" text-anchor="middle" font-weight="bold">${p.label}</text>`);
-      });
-
-      svg.push('</svg>');
-      container.innerHTML = svg.join('');
     }
 
     // --- Live Inference Console Logic ---

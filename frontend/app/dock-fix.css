@@ -1,24 +1,25 @@
 /* =========================================================================
-   Elliptic++ Fixed Dock Navigation (Larger, Legible, Compact, Never Overlaps)
+   Elliptic++ Page-Footer Navigation Dock
    - Height: 58px for high legibility and easy touch/click targets
    - Typography: 14px font with bold active indicators
-   - Clear contrast against rich midnight background
-   - Generous bottom clearance via 160px container padding
+   - Clear contrast against the warm ivory dashboard theme
+   - Normal document flow keeps the dock below page content
    ========================================================================= */
 
 .floating-dock {
-  position: fixed !important;
-  left: 50% !important;
-  bottom: 24px !important;
-  transform: translateX(-50%) !important;
-  z-index: 100 !important;
+  position: static !important;
+  transform: none !important;
+  z-index: auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  flex-wrap: wrap !important;
   gap: 6px !important;
-  max-width: 680px !important;
-  width: calc(100% - 36px) !important;
-  height: 58px !important;
+  max-width: calc(100% - 36px) !important;
+  width: max-content !important;
+  min-height: 58px !important;
+  height: auto !important;
+  margin: 24px auto 28px !important;
   padding: 6px 8px !important;
   border: 1px solid rgba(120, 170, 245, 0.32) !important;
   border-radius: 9999px !important;
@@ -85,8 +86,6 @@
 
 @media (max-width: 768px) {
   .floating-dock {
-    bottom: 16px !important;
-    height: 52px !important;
     padding: 4px 6px !important;
     max-width: calc(100% - 24px) !important;
   }

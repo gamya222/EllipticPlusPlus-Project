@@ -57,7 +57,7 @@ retrain or regenerate those artifacts.
 The local dashboard consists of a Next.js frontend in `frontend/` and a
 Python standard-library HTTP API in `dashboard/server.py`. The frontend uses
 Next.js rewrites to call the API at `127.0.0.1:8080`; the API serves overview,
-suspicious-transaction, model-metric, ego-network, and on-demand score routes.
+suspicious-transaction, model-metric, and on-demand score routes.
 It reads the raw edge CSV, processed transaction/edge Parquet, saved model and
 graph artifacts. On-demand scoring reuses `models.inference.EllipticInference`;
 it does not train models. The server binds to loopback only.
@@ -306,7 +306,7 @@ CSV, known test transactions can be identified but model inference is reported
 unavailable; the backend will not substitute another model's score.
 
 The frontend uses one Next.js page with hash-addressable client views: Overview,
-Explorer, Model Lab, Network, Inference, Metrics, and Graph Gallery. It calls
+Explorer, Model Lab, Inference, Metrics, and Graph Gallery. It calls
 the backend through the `/api/*` rewrite in `frontend/next.config.mjs`. The
 read-only evaluation endpoints are `GET /api/evaluation` and `GET /api/graphs`;
 PNG files are exposed at `/api/metric-graphs/<task>/<metric>_comparison.png`.

@@ -4,7 +4,6 @@ export type BackendState = {
   overview: ApiRecord | ApiRecord[] | null
   suspicious: ApiRecord[]
   models: ApiRecord[]
-  network: ApiRecord | ApiRecord[] | null
   score: ApiRecord | null
 }
 

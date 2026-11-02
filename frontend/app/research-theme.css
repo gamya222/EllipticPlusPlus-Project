@@ -228,6 +228,108 @@ body {
   text-align: right;
 }
 
+.performance-comparison-subtitle {
+  margin: 0;
+  color: #555b4d !important;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.performance-comparison-table-wrap {
+  overflow-x: auto;
+}
+
+.performance-comparison-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+}
+
+.performance-comparison-table th,
+.performance-comparison-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e8e3d6;
+}
+
+.performance-comparison-table thead th {
+  background: #f1eddf;
+  color: #4d5046;
+  font: 700 11px/1.35 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.performance-comparison-table th:nth-child(n+3),
+.performance-comparison-table td:nth-child(n+3) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.performance-comparison-table .performance-algorithm-name {
+  width: 29%;
+  min-width: 230px;
+  border-bottom: 2px solid #d8ddcf;
+  border-left: 3px solid #71834f;
+  background: #f1f4eb;
+  color: #35452b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.performance-comparison-table .performance-metric-name {
+  width: 27%;
+  color: #34372f;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.performance-comparison-table tr:nth-child(10n + 11) th,
+.performance-comparison-table tr:nth-child(10n + 11) td {
+  border-top: 2px solid #d8ddcf;
+}
+
+.performance-comparison-table .performance-after-value {
+  color: #35452b;
+  font-weight: 700;
+}
+
+.performance-comparison-table .performance-before-value {
+  color: #34372f;
+  font-variant-numeric: tabular-nums;
+}
+
+.performance-comparison-table .performance-change-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.performance-comparison-table .change-improved {
+  color: #3f7048;
+}
+
+.performance-comparison-table .change-deteriorated {
+  color: #a64c43;
+}
+
+.performance-comparison-table .change-neutral {
+  color: #77776d;
+}
+
+.performance-unavailable {
+  color: #77776d;
+  font-weight: 500;
+}
+
+.performance-source-note {
+  margin: 12px 0 0;
+}
+
 .metric-name-cell {
   font-weight: 700;
 }
@@ -266,6 +368,77 @@ body {
   gap: 18px;
 }
 
+.preprocessing-error-section {
+  margin-top: 42px;
+}
+
+.preprocessing-error-heading {
+  margin-bottom: 18px;
+}
+
+.preprocessing-error-heading h2 {
+  margin: 7px 0 8px;
+  color: #242820;
+  font-size: clamp(24px, 3vw, 34px);
+}
+
+.preprocessing-error-heading p {
+  max-width: 900px;
+  margin: 0;
+  color: #65675d;
+  line-height: 1.55;
+}
+
+.preprocessing-error-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.preprocessing-error-card {
+  min-width: 0;
+  padding: 18px;
+  overflow: hidden;
+  background: #fffefa;
+  border: 1px solid #ded9ca;
+}
+
+.preprocessing-error-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.preprocessing-error-card > p {
+  min-height: 36px;
+  margin: 0 0 8px;
+  color: #65675d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.preprocessing-error-chart {
+  width: 100%;
+  height: 330px;
+  min-width: 0;
+}
+
+.preprocessing-error-grid > .preprocessing-error-card:last-child {
+  grid-column: 1 / -1;
+  width: calc(50% - 9px);
+  justify-self: center;
+}
+
+@media (max-width: 850px) {
+  .preprocessing-error-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .preprocessing-error-grid > .preprocessing-error-card:last-child {
+    grid-column: auto;
+    width: 100%;
+  }
+}
+
 .graph-summary-panel {
   justify-content: center;
   padding-bottom: 12px;
@@ -296,39 +469,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.graph-summary-panel > p,
-.actual-network-view > p {
+.graph-summary-panel > p {
   margin: 0 20px 18px;
   color: #65675d !important;
   font-size: 12px;
   line-height: 1.5;
-}
-
-.actual-network-view {
-  padding: 10px 16px 0;
-}
-
-.network-scope-line {
-  padding: 9px 12px;
-  color: #65675d;
-  background: #f3eedf;
-  border: 1px solid #e6e0d1;
-  font-size: 12px;
-}
-
-.actual-network-view svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 440px;
-  margin: 10px 0;
-  background: #fffdf6;
-  border: 1px solid #e6e0d1;
-}
-
-.actual-network-view svg text {
-  fill: #3d4037;
-  font: 10px var(--font-mono, monospace);
 }
 
 .metric-figure-card {
@@ -359,10 +504,188 @@ body {
   background: #fffefa;
 }
 
+/* Overview model intelligence: light surfaces with clear, readable contrast. */
+.command-shell .champion-readout {
+  border: 1px solid #cbd4bf;
+  border-top: 4px solid #596b45;
+  background: #f1f4eb;
+  color: #242820;
+}
+
+.command-shell .champion-title,
+.command-shell .metric-val,
+.command-shell .queue-title,
+.command-shell .queue-entity,
+.command-shell .queue-prob {
+  color: #242820 !important;
+}
+
+.command-shell .champion-badge {
+  border-color: #aebc9c;
+  background: #e3ead9;
+  color: #405332;
+}
+
+.command-shell .champion-desc,
+.command-shell .metric-label {
+  color: #555b4d !important;
+}
+
+.command-shell .champion-metrics-grid {
+  border-top-color: #cbd4bf;
+}
+
+.command-shell .champion-metric-box {
+  border-color: #d8ddcf;
+  background: #fffefa;
+}
+
+.command-shell .champion-metric-box.highlight {
+  border-color: #82966d;
+  background: #e5ecdD;
+}
+
+.command-shell .summary-queue {
+  border: 1px solid #d8d2c2;
+  border-top: 4px solid #a95543;
+  background: #fffefa;
+  color: #242820;
+}
+
+.command-shell .queue-row {
+  border-color: #e1dbcB;
+  background: #f7f3e8;
+}
+
+.command-shell .queue-row:hover {
+  background: #eef1e6;
+}
+
+.command-shell .queue-prob {
+  color: #555b4d !important;
+}
+
+.command-shell .status-pill.status-high {
+  border-color: #d4a59b;
+  background: #f7e6e1;
+  color: #8e3f31 !important;
+}
+
+.command-shell .queue-btn {
+  border-color: #7e9167;
+  background: #e5ecdD;
+  color: #35452b;
+}
+
+.command-shell .queue-btn:hover {
+  border-color: #596b45;
+  background: #d8e2cb;
+  color: #26331f;
+}
+
+/* Live inference: keep controls and score panels legible in the light theme. */
+.command-shell .inference-view .form-group label {
+  color: #4d5046 !important;
+}
+
+.command-shell .inference-view .model-tab-btn {
+  border-color: #d2cdbd;
+  background: #fffefa;
+  color: #34372f !important;
+  box-shadow: none;
+}
+
+.command-shell .inference-view .model-tab-btn:hover {
+  border-color: #9aa486;
+  background: #f3eedf;
+  color: #35452b !important;
+}
+
+.command-shell .inference-view .model-tab-btn.active {
+  border-color: #71834f;
+  background: #e5ecdD;
+  color: #35452b !important;
+  box-shadow: inset 0 -3px 0 #596b45;
+}
+
+.command-shell .inference-view .tx-input-wrap input {
+  border-color: #c9c4b4;
+  background: #fffefa;
+  color: #242820;
+}
+
+.command-shell .inference-view .tx-input-wrap input::placeholder {
+  color: #77776d;
+}
+
+.command-shell .inference-view .tx-input-wrap input:focus {
+  border-color: #71834f;
+  box-shadow: 0 0 0 3px rgba(113, 131, 79, 0.16);
+}
+
+.command-shell .inference-view .score-submit-btn {
+  border-color: #596b45;
+  background: #596b45;
+  color: #fffefa;
+}
+
+.command-shell .inference-view .score-submit-btn:hover {
+  background: #405332;
+  color: #fffefa;
+  box-shadow: 0 3px 10px rgba(64, 83, 50, 0.2);
+}
+
+.command-shell .inference-view .preset-quick-select {
+  color: #555b4d;
+}
+
+.command-shell .inference-view .preset-quick-select button {
+  border-color: #cbd4bf;
+  background: #edf1e7;
+  color: #405332;
+}
+
+.command-shell .inference-view .preset-quick-select button:hover {
+  border-color: #71834f;
+  background: #e0e8d6;
+  color: #35452b;
+}
+
+.command-shell .inference-view .gauge-box {
+  border-color: #d8d2c2;
+  background: #f7f3e8;
+}
+
+.command-shell .inference-view .gauge-box:first-child {
+  border-top: 4px solid #596b45;
+}
+
+.command-shell .inference-view .gauge-box:last-child {
+  border-top: 4px solid #a95543;
+  background: #fbf0eb;
+}
+
+.command-shell .inference-view .gauge-label,
+.command-shell .inference-view .gauge-sub {
+  color: #555b4d !important;
+}
+
+.command-shell .inference-view .inference-summary-strip {
+  border-color: #d8d2c2;
+  background: #f1f4eb;
+}
+
+.command-shell .inference-view .strip-item > span:first-child {
+  color: #555b4d !important;
+}
+
+.command-shell .inference-view .strip-item > strong {
+  color: #242820;
+}
+
 @media (max-width: 768px) {
   .dock-index { display: none !important; }
   .dock-btn { gap: 5px !important; padding-inline: 11px !important; }
   .evaluation-card { padding: 14px; }
   .graph-summary-grid { padding: 14px; }
-  .actual-network-view { padding-inline: 8px; }
 }

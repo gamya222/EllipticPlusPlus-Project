@@ -4,6 +4,17 @@ import { useMemo, useState, useEffect, type ReactNode } from 'react'
 import useSWR from 'swr'
 import { AnimatePresence, motion } from 'motion/react'
 import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import {
   Activity,
   AlertTriangle,
   ArrowRight,
@@ -26,17 +37,58 @@ const coral = '#a95543'
 const amber = '#c69b45'
 const emerald = '#71834f'
 
-type ViewId = 'overview' | 'explorer' | 'models' | 'network' | 'inference' | 'metrics' | 'graphs'
+const preprocessingAlgorithms = [
+  { id: 'gcn', name: 'Graph Convolutional Network (GCN)', chartName: 'GCN' },
+  { id: 'graphsage', name: 'GraphSAGE', chartName: 'GraphSAGE' },
+  { id: 'gru', name: 'Temporal GRU', chartName: 'GRU' },
+  { id: 'logistic', name: 'Logistic Regression', chartName: 'Logistic' },
+  { id: 'risk_scorer', name: 'Calibrated Risk Scorer (Platt-Calibrated GRU)', chartName: 'Risk Scorer' },
+]
+
+const preprocessingMetrics = [
+  { id: 'rmse', label: 'RMSE', higherIsBetter: false },
+  { id: 'mse', label: 'MSE', higherIsBetter: false },
+  { id: 'mae', label: 'MAE', higherIsBetter: false },
+  { id: 'mape', label: 'MAPE', higherIsBetter: false },
+  { id: 'r2', label: 'R²', higherIsBetter: true },
+  { id: 'nrmse', label: 'NRMSE', higherIsBetter: false },
+  { id: 'medae', label: 'MedAE', higherIsBetter: false },
+  { id: 'bias', label: 'Bias / ME', higherIsBetter: false, closerToZero: true },
+]
+
+const preprocessingErrorCharts = [
+  { id: 'rmse', title: 'Root Mean Square Error (RMSE)', axisLabel: 'RMSE' },
+  { id: 'mse', title: 'Mean Squared Error (MSE)', axisLabel: 'MSE' },
+  { id: 'mae', title: 'Mean Absolute Error (MAE)', axisLabel: 'MAE' },
+  { id: 'r2', title: 'Coefficient of Determination (R²)', axisLabel: 'R²' },
+  { id: 'nrmse', title: 'Normalized Root Mean Square Error (NRMSE)', axisLabel: 'NRMSE' },
+  { id: 'medae', title: 'Median Absolute Error (MedAE)', axisLabel: 'MedAE' },
+  { id: 'bias', title: 'Bias / Mean Error', axisLabel: 'Signed mean error' },
+]
+
+function savedRegressionMetric(data: ApiRecord | undefined, metricId: string, modelId: string): ApiRecord | undefined {
+  const groups = (data?.groups || {}) as Record<string, Array<ApiRecord>>
+  const regression = groups.regression || []
+  const row = regression.find((item) => String(item.metric) === metricId)
+  const results = (row?.results || {}) as Record<string, ApiRecord>
+  return results[modelId]
+}
+
+function comparisonMetricValue(result: ApiRecord | undefined): number | null {
+  if (String(result?.status || '') !== 'calculated') return null
+  return numberValue(result, ['value'])
+}
+
+type ViewId = 'overview' | 'explorer' | 'models' | 'inference' | 'metrics' | 'graphs'
 type Feed = { mutate: () => void }
 
 const nav: Array<{ id: ViewId; label: string; icon: typeof Activity; index: string }> = [
   { id: 'overview', label: 'Overview', icon: Activity, index: '01' },
   { id: 'explorer', label: 'Explorer', icon: Target, index: '02' },
   { id: 'models', label: 'Model Lab', icon: BrainCircuit, index: '03' },
-  { id: 'network', label: 'Network', icon: Network, index: '04' },
-  { id: 'inference', label: 'Inference', icon: Zap, index: '05' },
-  { id: 'metrics', label: 'Metrics', icon: ChartNoAxesCombined, index: '06' },
-  { id: 'graphs', label: 'Graph Gallery', icon: Images, index: '07' },
+  { id: 'inference', label: 'Inference', icon: Zap, index: '04' },
+  { id: 'metrics', label: 'Metrics', icon: ChartNoAxesCombined, index: '05' },
+  { id: 'graphs', label: 'Graph Gallery', icon: Images, index: '06' },
 ]
 
 function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -135,56 +187,6 @@ function GraphSummaryPanel({ overviewData }: { overviewData?: ApiRecord }) {
   )
 }
 
-function TransactionNeighborhood({ data }: { data?: ApiRecord | ApiRecord[] }) {
-  const response = (Array.isArray(data) ? undefined : data) as ApiRecord | undefined
-  const allNodes = Array.isArray(response?.nodes) ? response.nodes as ApiRecord[] : []
-  const edges = Array.isArray(response?.edges) ? response.edges as ApiRecord[] : []
-  const nodes = allNodes.slice(0, 31)
-  if (!nodes.length) return <Empty message="No transaction neighborhood is available from the graph endpoint." />
-
-  const centerNode = response?.center_node as ApiRecord | undefined
-  const centerId = String(response?.query_txId ?? centerNode?.id ?? '')
-  const centerIndex = nodes.findIndex((node) => String(node.id ?? node.txId) === centerId)
-  const center = centerIndex < 0 ? 0 : centerIndex
-  const positions = nodes.map((node, index) => index === center
-    ? { x: 360, y: 190 }
-    : (() => {
-        const neighborIndex = index < center ? index : index - 1
-        const totalNeighbors = Math.max(nodes.length - 1, 1)
-        const angle = (neighborIndex / totalNeighbors) * Math.PI * 2 - Math.PI / 2
-        return { x: 360 + Math.cos(angle) * 260, y: 190 + Math.sin(angle) * 135 }
-      })())
-  const shownIds = new Set(nodes.map((node) => String(node.id ?? node.txId)))
-  const visibleEdges = edges.filter((edge) => shownIds.has(String(edge.source)) && shownIds.has(String(edge.target)))
-  const indexById = new Map(nodes.map((node, index) => [String(node.id ?? node.txId), index]))
-
-  return <div className="actual-network-view">
-    <div className="network-scope-line">Observed transaction edges · showing {nodes.length} of {allNodes.length} nodes · {visibleEdges.length} displayed directed edges</div>
-    <svg viewBox="0 0 720 380" role="img" aria-label={`Observed transaction neighborhood for ${centerId}`}>
-      {visibleEdges.map((edge, index) => {
-        const sourceIndex = indexById.get(String(edge.source))
-        const targetIndex = indexById.get(String(edge.target))
-        if (sourceIndex === undefined || targetIndex === undefined) return null
-        const source = positions[sourceIndex]
-        const target = positions[targetIndex]
-        return <line key={`${edge.source}-${edge.target}-${index}`} x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke="#a8a18e" strokeWidth="1.4" markerEnd="url(#actual-edge-arrow)" />
-      })}
-      <defs><marker id="actual-edge-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8c8778" /></marker></defs>
-      {nodes.map((node, index) => {
-        const id = String(node.id ?? node.txId)
-        const risk = numberValue(node, ['calibrated_risk'])
-        const fill = index === center ? '#596b45' : risk === null ? '#9a978d' : risk >= 0.5 ? '#a95543' : risk >= 0.2 ? '#b58b32' : '#71834f'
-        const pos = positions[index]
-        return <g key={id}>
-          <title>{`Transaction ${id}; ${String(node.relation || 'neighbor')}; timestep ${node.timestep ?? 'unavailable'}; calibrated risk ${risk === null ? 'unavailable' : risk}`}</title>
-          <circle cx={pos.x} cy={pos.y} r={index === center ? 13 : 8} fill={fill} stroke="#fffefa" strokeWidth="2" />
-          <text x={pos.x} y={pos.y + 22} textAnchor="middle">{id.slice(-8)}</text>
-        </g>
-      })}
-    </svg>
-    <p>Node color reflects the available calibrated risk score only. Graph membership and layout use the stored directed edge list; missing risk values are gray.</p>
-  </div>
-}
 /* =========================================================================
    Distinctive Asymmetric Hero Section (100% Dynamic Metadata, Zero Hardcoding)
    ========================================================================= */
@@ -612,19 +614,104 @@ function ModelLab({
   )
 }
 
-function EvaluationMetrics({ data, loading, error, retry }: {
+function EvaluationMetrics({ data, modelsData, loading, error, retry }: {
   data?: ApiRecord
+  modelsData?: ApiRecord | ApiRecord[]
   loading: boolean
   error?: Error
   retry: () => void
 }) {
   const groups = (data?.groups || {}) as Record<string, Array<ApiRecord>>
   const models = Array.isArray(data?.models) ? data.models as ApiRecord[] : []
+  const modelCards = records(modelsData)
+  const modelCardById = new Map(modelCards.map((model) => [String(model.id), model]))
+  const beforeComparison = (data?.before_preprocessing || {}) as ApiRecord
+  const beforeModels = (beforeComparison.models || {}) as Record<string, ApiRecord>
   const headings: Record<string, string> = { regression: 'Regression metrics', classification: 'Classification metrics' }
+  const matrixModels = preprocessingAlgorithms
+  const matrixMetrics = preprocessingMetrics
+  const savedClassification = groups.classification || []
+  const savedValue = (metricId: string, modelId: string): number | null => {
+    const row = savedClassification.find((item) => String(item.metric) === metricId)
+    const results = (row?.results || {}) as Record<string, ApiRecord>
+    const value = results[modelId]?.value
+    return typeof value === 'number' && Number.isFinite(value) ? value : null
+  }
+  const savedRegressionValue = (metricId: string, modelId: string): ApiRecord | undefined => {
+    return savedRegressionMetric(data, metricId, modelId)
+  }
+  const performanceFor = (modelId: string) => {
+    const model = modelCardById.get(modelId)
+    const confusion = (model?.confusion_matrix || {}) as ApiRecord
+    const tn = numberValue(confusion, ['tn'])
+    const fp = numberValue(confusion, ['fp'])
+    const fn = numberValue(confusion, ['fn'])
+    const tp = numberValue(confusion, ['tp'])
+    const total = tn !== null && fp !== null && fn !== null && tp !== null ? tn + fp + fn + tp : 0
+    const ratio = (numerator: number, denominator: number) => denominator > 0 ? numerator / denominator : null
+    const accuracy = total > 0 ? ratio(tn! + tp!, total) : numberValue(model, ['accuracy'])
+    const precision = total > 0 ? ratio(tp!, tp! + fp!) : numberValue(model, ['precision'])
+    const recall = total > 0 ? ratio(tp!, tp! + fn!) : numberValue(model, ['recall'])
+    const specificity = total > 0 ? ratio(tn!, tn! + fp!) : null
+    const f1 = precision !== null && recall !== null ? ratio(2 * precision * recall, precision + recall) : numberValue(model, ['f1', 'f1_score'])
+    const cardMetricValues = {
+      accuracy: numberValue(model, ['accuracy']),
+      precision: numberValue(model, ['precision']),
+      recall: numberValue(model, ['recall']),
+      f1_score: numberValue(model, ['f1', 'f1_score']),
+      pr_auc: numberValue(model, ['pr_auc']),
+    }
+    const savedMetricValues = {
+      accuracy: savedValue('accuracy', modelId),
+      precision: savedValue('precision', modelId),
+      recall: savedValue('recall', modelId),
+      f1_score: savedValue('f1_score', modelId),
+    }
+    const savedMatchesCard = (Object.keys(savedMetricValues) as Array<keyof typeof savedMetricValues>).every((key) => {
+      const cardValue = cardMetricValues[key]
+      const saved = savedMetricValues[key]
+      return cardValue !== null && saved !== null && Math.abs(cardValue - saved) <= 0.00005
+    }) && (() => {
+      const reference = (model?.benchmark_reference || {}) as ApiRecord
+      const referenceMatrix = (reference.confusion_matrix || {}) as ApiRecord
+      const rTn = numberValue(referenceMatrix, ['tn'])
+      const rFp = numberValue(referenceMatrix, ['fp'])
+      const rFn = numberValue(referenceMatrix, ['fn'])
+      const rTp = numberValue(referenceMatrix, ['tp'])
+      if (rTn === null || rFp === null || rFn === null || rTp === null) return false
+      const referenceAccuracy = ratio(rTn + rTp, rTn + rFp + rFn + rTp)
+      const referenceValues = {
+        accuracy: referenceAccuracy,
+        precision: numberValue(reference, ['precision']),
+        recall: numberValue(reference, ['recall']),
+        f1_score: numberValue(reference, ['f1']),
+        pr_auc: numberValue(reference, ['pr_auc']),
+      }
+      return (Object.keys(cardMetricValues) as Array<keyof typeof cardMetricValues>).every((key) => {
+        const cardValue = cardMetricValues[key]
+        const referenceValue = referenceValues[key]
+        return cardValue !== null && referenceValue !== null && Math.abs(cardValue - referenceValue) <= 0.00005
+      })
+    })()
+    const savedRocAuc = savedValue('auc_roc', modelId)
+    return {
+      accuracy,
+      precision,
+      recall,
+      specificity,
+      f1,
+      pr_auc: cardMetricValues.pr_auc,
+      roc_auc: numberValue(model, ['roc_auc']) ?? (savedMatchesCard ? savedRocAuc : null),
+      fpr: total > 0 ? ratio(fp!, fp! + tn!) : null,
+      fnr: total > 0 ? ratio(fn!, fn! + tp!) : null,
+      error_rate: accuracy !== null ? 1 - accuracy : null,
+      roc_auc_note: savedMatchesCard ? '' : 'Saved ROC-AUC does not match this model card result set.',
+    } as Record<string, number | null | string>
+  }
   return (
     <div className="studio-view">
       <div className="view-masthead">
-        <Label>Evaluation Results / 06</Label>
+        <Label>Evaluation Results / 05</Label>
         <h1>Metrics from saved results</h1>
         <p>Values are read from the evaluation module’s CSV exports for the held-out labeled test set. Undefined and unavailable values remain explicit.</p>
       </div>
@@ -650,6 +737,53 @@ function EvaluationMetrics({ data, loading, error, retry }: {
               </table></div>}
             </Card>
           })}
+          <Card className="evaluation-card performance-comparison-card">
+            <SectionHead
+              eyebrow="Matrices"
+              title="Preprocessing Impact"
+              meta="5 algorithms · 8 metrics"
+            />
+            <p className="performance-comparison-subtitle">Probability error against the binary illicit label, compared before and after feature preprocessing for the same held-out test transactions.</p>
+            <div className="table-wrap evaluation-table-wrap performance-comparison-table-wrap">
+              <table className="dense-table performance-comparison-table">
+                <thead><tr><th>Algorithm</th><th>Metric</th><th>Before Preprocessing</th><th>After Preprocessing</th><th>Change</th></tr></thead>
+                <tbody>{matrixModels.map((algorithm) => {
+                  const beforeMetrics = (beforeModels[algorithm.id]?.regression_metrics || {}) as Record<string, ApiRecord>
+                  return matrixMetrics.map((metric, index) => {
+                    const beforeResult = beforeMetrics[metric.id]
+                    const afterResult = savedRegressionValue(metric.id, algorithm.id)
+                    const beforeValue = numberValue(beforeResult, ['value'])
+                    const afterValue = numberValue(afterResult, ['value'])
+                    const beforeStatus = String(beforeResult?.status || 'unavailable')
+                    const afterStatus = String(afterResult?.status || 'unavailable')
+                    const change = beforeValue !== null && afterValue !== null
+                      ? (metric.closerToZero ? Math.abs(beforeValue) - Math.abs(afterValue) : metric.higherIsBetter ? afterValue - beforeValue : beforeValue - afterValue)
+                      : null
+                    const changeStatus = change === null ? 'unavailable' : Math.abs(change) < 0.00005 ? 'neutral' : change > 0 ? 'improved' : 'deteriorated'
+                    const displayValue = (value: number | null, status: string) => status === 'undefined' ? 'Undefined' : status === 'calculated' && value !== null ? value.toFixed(4) : 'N/A'
+                    return <tr key={`${algorithm.id}-${metric.id}`}>
+                      {index === 0 && <th scope="rowgroup" rowSpan={matrixMetrics.length} className="performance-algorithm-name">{algorithm.name}</th>}
+                      <th scope="row" className="performance-metric-name">{metric.label}</th>
+                      <td className="performance-before-value">
+                        {displayValue(beforeValue, beforeStatus) === 'N/A' ? <span className="performance-unavailable" title={String(beforeComparison.reason || 'Before-preprocessing regression results are unavailable.')}>N/A</span> : displayValue(beforeValue, beforeStatus)}
+                      </td>
+                      <td className="performance-after-value">
+                        {displayValue(afterValue, afterStatus) === 'N/A' ? <span className="performance-unavailable">N/A</span> : displayValue(afterValue, afterStatus)}
+                      </td>
+                      <td className={`performance-change-value change-${changeStatus}`}>
+                        {change === null ? <span className="performance-unavailable">N/A</span> : <span title={metric.closerToZero ? 'Change = |Before| − |After| (closer to zero is better).' : metric.higherIsBetter ? 'Change = After − Before (higher is better).' : 'Change = Before − After (lower is better).'}>
+                          {changeStatus === 'improved' ? '↑ ' : changeStatus === 'deteriorated' ? '↓ ' : '• '}{change > 0 ? '+' : ''}{change.toFixed(4)}
+                        </span>}
+                      </td>
+                    </tr>
+                  })
+                })}</tbody>
+              </table>
+            </div>
+            <p className="evaluation-source performance-source-note">
+              Scores compare predicted illicit probabilities with binary test labels, not continuous transaction amounts. Before values are calculated from the saved original-scale experiment predictions; After values come from the saved regression results. Both use labeled timesteps 35–49 (16,670 records). MAPE is undefined because the target includes zeros. Bias / ME improvement means the signed error moves closer to zero. GRU epoch selection and Platt calibration both use validation timesteps 31–34, so calibration-period reuse remains a limitation.
+            </p>
+          </Card>
           <p className="evaluation-source">Source: <code>{String(data?.source || 'evaluation_metrics/results/*.csv')}</code>. These probability-versus-label regression measures are descriptive; they are not separate continuous-target tasks.</p>
         </div>
       )}
@@ -657,8 +791,76 @@ function EvaluationMetrics({ data, loading, error, retry }: {
   )
 }
 
-function GraphGallery({ data, loading, error, retry }: {
+function PreprocessingErrorAnalysis({ data }: { data?: ApiRecord }) {
+  const before = (data?.before_preprocessing || {}) as ApiRecord
+  const beforeModels = (before.models || {}) as Record<string, ApiRecord>
+  // Each chart uses the exact same API values as the preprocessing comparison matrix.
+  const valuesFor = (metricId: string) => preprocessingAlgorithms.map((algorithm) => {
+    const beforeMetrics = (beforeModels[algorithm.id]?.regression_metrics || {}) as Record<string, ApiRecord>
+    return {
+      algorithm: algorithm.chartName,
+      fullName: algorithm.name,
+      before: comparisonMetricValue(beforeMetrics[metricId]),
+      after: comparisonMetricValue(savedRegressionMetric(data, metricId, algorithm.id)),
+    }
+  })
+
+  return <section className="preprocessing-error-section" aria-labelledby="preprocessing-error-heading">
+    <div className="view-masthead preprocessing-error-heading">
+      <Label>Preprocessing comparison</Label>
+      <h2 id="preprocessing-error-heading">Preprocessing Error Analysis</h2>
+      <p>Comparative analysis of prediction error and preprocessing performance across five algorithms, before and after feature preprocessing.</p>
+    </div>
+    {before.status !== 'available' || data?.status !== 'available' ? (
+      <Empty message="Saved before-and-after regression values are unavailable for these charts." />
+    ) : <div className="preprocessing-error-grid">
+      {preprocessingErrorCharts.map((metric) => {
+        const chartData = valuesFor(metric.id)
+        const numericValues = chartData.flatMap((row) => [row.before, row.after]).filter((value): value is number => value !== null)
+        const min = numericValues.length ? Math.min(...numericValues) : 0
+        const max = numericValues.length ? Math.max(...numericValues) : 1
+        const span = Math.max(max - min, Math.abs(min) * 0.1, Math.abs(max) * 0.1, 0.1)
+        const axisDomain: [number | 'auto', number | 'auto'] = metric.id === 'r2'
+          ? [min - span * 0.08, max + span * 0.08]
+          : metric.id === 'bias'
+            ? [Math.min(0, min) - span * 0.08, Math.max(0, max) + span * 0.08]
+            : [0, 'auto']
+        const explanation = metric.id === 'bias'
+          ? 'Signed mean error; values closer to zero indicate lower systematic prediction bias.'
+          : metric.id === 'r2'
+            ? 'Higher values indicate better explanatory fit; negative values are retained.'
+            : 'Lower values indicate lower prediction error.'
+        return <Card className="preprocessing-error-card" key={metric.id}>
+          <h3>{metric.title}</h3>
+          <p>{explanation}</p>
+          <div className="preprocessing-error-chart">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 12, bottom: 28, left: 4 }} barCategoryGap="22%">
+                <CartesianGrid stroke="#e5e0d3" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="algorithm" interval={0} angle={-24} textAnchor="end" height={58} tickMargin={8} tick={{ fill: '#56594f', fontSize: 11 }} axisLine={{ stroke: '#cfc8b8' }} tickLine={false} />
+                <YAxis domain={axisDomain} tick={{ fill: '#65675d', fontSize: 11 }} tickFormatter={(value) => Number(value).toFixed(2)} axisLine={false} tickLine={false} width={58} label={{ value: metric.axisLabel, angle: -90, position: 'insideLeft', fill: '#56594f', fontSize: 11 }} />
+                <Tooltip
+                  formatter={(value, name) => [typeof value === 'number' ? value.toFixed(4) : 'N/A', name]}
+                  labelFormatter={(_label, payload) => String(payload?.[0]?.payload?.fullName || _label)}
+                  contentStyle={{ background: '#fffefa', border: '1px solid #e0dacb', borderRadius: 8, color: '#242820' }}
+                  itemStyle={{ color: '#242820', fontSize: 12 }}
+                />
+                <Legend itemSorter={(item) => item.dataKey === 'before' ? 0 : 1} wrapperStyle={{ color: '#42463b', fontSize: 12, paddingTop: 8 }} />
+                {(metric.id === 'r2' || metric.id === 'bias') && <ReferenceLine y={0} stroke="#a95543" strokeWidth={2} />}
+                <Bar dataKey="before" name="Before Preprocessing" fill={violet} radius={[3, 3, 0, 0]} />
+                <Bar dataKey="after" name="After Preprocessing" fill={cyan} radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      })}
+    </div>}
+  </section>
+}
+
+function GraphGallery({ data, evaluationData, loading, error, retry }: {
   data?: ApiRecord
+  evaluationData?: ApiRecord
   loading: boolean
   error?: Error
   retry: () => void
@@ -668,7 +870,7 @@ function GraphGallery({ data, loading, error, retry }: {
   const groups = ['regression', 'classification']
   return <div className="studio-view">
     <div className="view-masthead">
-      <Label>Generated Figures / 07</Label>
+      <Label>Generated Figures / 06</Label>
       <h1>Metric graph gallery</h1>
       <p>Rendered PNG figures from the Python visualization scripts. Missing figures are omitted and reported by the generation manifest.</p>
     </div>
@@ -701,52 +903,12 @@ function GraphGallery({ data, loading, error, retry }: {
     {skippedGraphs.map((item) => <p className="evaluation-source" key={`skipped-${String(item.metric)}`}>
       {String(item.metric).toUpperCase()} graph skipped: {String(item.reason || 'No calculated result was available.')}
     </p>)}
+    <PreprocessingErrorAnalysis data={evaluationData} />
   </div>
 }
 
 /* =========================================================================
-   View 04: Network Explorer (Dedicated Dynamic Ego-Network Inspector)
-   ========================================================================= */
-function NetworkPage({
-  data,
-  loading,
-  error,
-  retry,
-}: {
-  data?: ApiRecord | ApiRecord[]
-  loading: boolean
-  error?: Error
-  retry: () => void
-}) {
-  const rows = records(data)
-  return (
-    <div className="immersive-view">
-      <div className="view-masthead">
-        <Label>Graph Investigation / 04</Label>
-        <h1>Network Explorer</h1>
-        <p>Interactive neighborhood and transaction transfer topology for flagged test entities.</p>
-      </div>
-
-      {loading ? (
-        <Loading />
-      ) : error ? (
-        <ErrorState error={error} retry={retry} />
-      ) : (
-        <Card className="immersive-network-card">
-          <SectionHead
-            eyebrow="Ego-Network Neighborhood"
-            title="Structural Adjacency &amp; Directional Flow"
-            meta={rows.length ? `${rows.length} BACKEND NODES RESOLVED` : 'IDLE'}
-          />
-          <TransactionNeighborhood data={data} />
-        </Card>
-      )}
-    </div>
-  )
-}
-
-/* =========================================================================
-   View 05: Live Inference Console (Dynamic Presets from /api/suspicious)
+   View 04: Live Inference Console (Dynamic Presets from /api/suspicious)
    ========================================================================= */
 function Inference({
   score,
@@ -807,7 +969,7 @@ function Inference({
   return (
     <div className="inference-view">
       <div className="view-masthead">
-        <Label>Scoring Console / 05</Label>
+        <Label>Scoring Console / 04</Label>
         <h1>Live Inference</h1>
         <p>On-demand evaluation across the held-out test transactions with separate model probabilities and calibrated risk.</p>
       </div>
@@ -956,7 +1118,6 @@ export default function IntelligenceDashboard() {
   const overview = useSWR('/api/overview', (path) => fetchBackend<ApiRecord>(path))
   const suspicious = useSWR('/api/suspicious', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
   const models = useSWR('/api/models', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
-  const network = useSWR('/api/network', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
   const score = useSWR('/api/score', (path) => fetchBackend<ApiRecord | ApiRecord[]>(path))
   const evaluation = useSWR('/api/evaluation', (path) => fetchBackend<ApiRecord>(path))
   const graphs = useSWR('/api/graphs', (path) => fetchBackend<ApiRecord>(path))
@@ -973,7 +1134,7 @@ export default function IntelligenceDashboard() {
     [suspicious.data, query]
   )
 
-  const retry = () => [overview, suspicious, models, network, score, evaluation, graphs].forEach((feed: Feed) => feed.mutate())
+  const retry = () => [overview, suspicious, models, score, evaluation, graphs].forEach((feed: Feed) => feed.mutate())
 
   return (
     <div className="command-shell">
@@ -1040,9 +1201,6 @@ export default function IntelligenceDashboard() {
             {page === 'models' && (
               <ModelLab data={models.data} loading={models.isLoading} error={models.error} retry={retry} />
             )}
-            {page === 'network' && (
-              <NetworkPage data={network.data} loading={network.isLoading} error={network.error} retry={retry} />
-            )}
             {page === 'inference' && (
               <Inference
                 score={score.data}
@@ -1052,13 +1210,13 @@ export default function IntelligenceDashboard() {
                 retry={retry}
               />
             )}
-            {page === 'metrics' && <EvaluationMetrics data={evaluation.data} loading={evaluation.isLoading} error={evaluation.error} retry={retry} />}
-            {page === 'graphs' && <GraphGallery data={graphs.data} loading={graphs.isLoading} error={graphs.error} retry={retry} />}
+            {page === 'metrics' && <EvaluationMetrics data={evaluation.data} modelsData={models.data} loading={evaluation.isLoading} error={evaluation.error} retry={retry} />}
+            {page === 'graphs' && <GraphGallery data={graphs.data} evaluationData={evaluation.data} loading={graphs.isLoading} error={graphs.error} retry={retry} />}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Floating Bottom Navigation Dock (Aligned, Larger, Legible, Compact, Never Overlaps) */}
+      {/* Page-footer navigation follows the selected view content. */}
       <nav className="floating-dock" aria-label="Primary navigation">
         {nav.map(({ id, label, icon: Icon, index }) => (
           <button

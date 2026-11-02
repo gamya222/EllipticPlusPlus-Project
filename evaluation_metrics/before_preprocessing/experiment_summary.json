@@ -1,0 +1,44 @@
+{
+  "schema_version": "elliptic-before-preprocessing-run-v1",
+  "completed": true,
+  "models": [
+    "gcn",
+    "graphsage",
+    "gru",
+    "calibrated_risk_scorer",
+    "logistic_regression"
+  ],
+  "test_rows": [
+    16670,
+    16670,
+    16670,
+    16670,
+    16670
+  ],
+  "model_devices": {
+    "gcn": "cuda",
+    "graphsage": "cuda",
+    "gru": "cuda",
+    "calibrated_risk_scorer": "cuda",
+    "logistic_regression": "cpu"
+  },
+  "train_timesteps": [
+    1,
+    34
+  ],
+  "selection_train_timesteps": [
+    1,
+    30
+  ],
+  "test_timesteps": [
+    35,
+    49
+  ],
+  "cumulative_model_runtime_seconds": 122.33392930000264,
+  "device": "cuda",
+  "validation_timesteps": [
+    31,
+    34
+  ],
+  "resume_process_runtime_seconds": 52.50636850000592
+}

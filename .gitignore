@@ -1,6 +1,7 @@
 # Python virtual environment
 .venv/
 venv/
+.venv_before_preprocessing/
 
 # Python cache
 __pycache__/
@@ -20,6 +21,8 @@ data/processed/
 
 # Locally trained model artifacts
 models/*/artifacts/
+evaluation_metrics/before_preprocessing/artifacts/
+evaluation_metrics/before_preprocessing_console.log
 
 # PySpark / Hadoop temporary files
 *.crc
